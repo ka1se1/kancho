@@ -1,5 +1,0 @@
-# Desktop の他のファイルは無視、ゲームファイルだけ追跡
-*
-!.gitignore
-!kancho-3d.html
-!HANDOFF.md

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                            https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+        version="5.0">
+
+  <!-- 4.1: HelloXXXXX サーブレット -->
+  <servlet>
+    <servlet-name>helloXXXXX</servlet-name>
+    <servlet-class>HelloXXXXX</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>helloXXXXX</servlet-name>
+    <url-pattern>/servlet/helloXXXXX</url-pattern>
+  </servlet-mapping>
+
+  <!-- 4.2: PlusXXXXX サーブレット -->
+  <servlet>
+    <servlet-name>plusXXXXX</servlet-name>
+    <servlet-class>PlusXXXXX</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>plusXXXXX</servlet-name>
+    <url-pattern>/servlet/plusXXXXX</url-pattern>
+  </servlet-mapping>
+
+</web-app>

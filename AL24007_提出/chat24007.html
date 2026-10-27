@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>チャット送信 - AL24007</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; }
+    input[type="text"] { width: 300px; padding: 6px; font-size: 14px; }
+    input[type="submit"] { padding: 6px 16px; font-size: 14px; margin-left: 8px; }
+    p { color: #555; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h2>チャット送信</h2>
+  <form method="get" action="/WebApplicationTest/servlet/chatCon24007">
+    <label>メッセージ:
+      <input type="text" name="MYMESSAGE" placeholder="メッセージを入力">
+    </label>
+    <input type="submit" value="送信">
+  </form>
+  <p>※ 「Q」を入力して送信すると直近20件のメッセージを表示します。</p>
+</body>
+</html>

@@ -1,0 +1,9 @@
+@echo off
+setlocal enabledelayedexpansion
+
+for /r %%f in (*.txxt) do (
+    set "newname=%%~dpnf.txxt"
+    ren "%%f" "%%~nf.jsp"
+)
+
+echo Done!

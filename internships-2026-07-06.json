@@ -1,0 +1,381 @@
+[
+  {
+    "id": "seed-nec",
+    "company": "NEC",
+    "course": "職場受入れ型（A29 生成AIアプリ実装）",
+    "status": "不参加・見送り",
+    "eventStart": "2026-08-24",
+    "eventEnd": "2026-09-04",
+    "location": "東京/Zoom",
+    "priority": "高",
+    "mypageUrl": "https://axol.jp/zw/s/necgroup_28/mypage/login",
+    "memo": "7月15日（水）までに通知予定"
+  },
+  {
+    "id": "seed-fujitsu",
+    "company": "富士通",
+    "course": "",
+    "status": "不参加・見送り",
+    "eventStart": "2026-09-01",
+    "eventEnd": "2026-10-30",
+    "priority": "高",
+    "mypageUrl": "https://career50.sapsf.com/career?career_company=fujitsulimP2&lang=ja_JP&company=fujitsulimP2&site=&loginFlowRequired=true&_s.crb=UbgGjYi8i5bLdimuqiZfBffyUXYwALTJNvfwtJiPKW0%3d",
+    "memo": "結果通知: 7/5以降"
+  },
+  {
+    "id": "seed-nttdata",
+    "company": "NTTデータ",
+    "course": "",
+    "status": "不参加・見送り",
+    "eventStart": "2026-09-14",
+    "eventEnd": "2026-10-30",
+    "mypageUrl": "https://nttdata.snar.jp/login.aspx",
+    "memo": "落選 / 結果通知: 6/11〜6/15"
+  },
+  {
+    "id": "seed-softbank",
+    "company": "ソフトバンク",
+    "course": "",
+    "status": "不参加・見送り",
+    "mypageUrl": "https://softbank-recruit.snar.jp/login.aspx",
+    "memo": "落選"
+  },
+  {
+    "id": "seed-ctc",
+    "company": "CTC（伊藤忠テクノ）",
+    "course": "",
+    "status": "不参加・見送り",
+    "mypageUrl": "https://mypage.3070.i-webs.jp/ctc2028/",
+    "memo": "落選"
+  },
+  {
+    "id": "seed-nssol",
+    "company": "日鉄ソリューションズ",
+    "course": "",
+    "status": "不参加・見送り",
+    "memo": "落選"
+  },
+  {
+    "id": "seed-mitsubishi-electric",
+    "company": "三菱電機",
+    "course": "",
+    "status": "不参加・見送り",
+    "mypageUrl": "https://mitsubishi-electric.saiyo.jp/2028/",
+    "memo": "間に合わず"
+  },
+  {
+    "id": "seed-astemo",
+    "company": "Astemo",
+    "course": "渋谷_1（Claude+AI）",
+    "status": "不参加・見送り",
+    "eventStart": "2026-08-24",
+    "eventEnd": "2026-08-28",
+    "location": "東京渋谷",
+    "memo": "Webテスト受け忘れ"
+  },
+  {
+    "id": "seed-sky",
+    "company": "Sky",
+    "course": "先輩社員座談会",
+    "status": "参加確定",
+    "eventStart": "2026-07-10",
+    "eventEnd": "2026-07-10",
+    "location": "東京本社 JR品川イーストビル 9階",
+    "mypageUrl": "https://axol.jp/zw/s/skygroup_28/mypage/login",
+    "memo": "13時-17時"
+  },
+  {
+    "id": "seed-mufg-it",
+    "company": "三菱UFJインフォメーションテクノロジー",
+    "course": "金融×ITプロジェクト体験",
+    "status": "結果待ち",
+    "resultDate": "2026-07-13",
+    "eventStart": "2026-08-04",
+    "eventEnd": "2026-08-07",
+    "mypageUrl": "https://axol.jp/zw/s/muit_28/mypage/login",
+    "memo": "計5日間 / 10月上旬にフォローあり"
+  },
+  {
+    "id": "seed-dentsu-soken",
+    "company": "電通総研テクノロジー",
+    "course": "企業を支えるアプリケーション",
+    "status": "結果待ち",
+    "eventStart": "2026-08-19",
+    "eventEnd": "2026-08-19",
+    "location": "電通総研テクノロジー品川本社",
+    "mypageUrl": "https://mypage.3010.i-webs.jp/t-dentsusoken2028/",
+    "memo": "抽選"
+  },
+  {
+    "id": "seed-amano",
+    "company": "アマノ",
+    "course": "ソフトウェア開発体験（TIS/PKチーム）",
+    "status": "結果待ち",
+    "resultDate": "2026-07-24",
+    "eventStart": "2026-08-18",
+    "eventEnd": "2026-08-20",
+    "location": "神奈川横浜",
+    "mypageUrl": "https://axol.jp/zw/s/amano_28/mypage/login",
+    "memo": "開催候補: 8/18〜20 または 9/1〜3"
+  },
+  {
+    "id": "seed-toshiba",
+    "company": "東芝",
+    "course": "",
+    "status": "不参加・見送り",
+    "deadline": "2026-06-10",
+    "memo": "締切過ぎ"
+  },
+  {
+    "id": "seed-exeo",
+    "company": "エクシオ",
+    "course": "",
+    "status": "参加確定",
+    "eventStart": "2026-08-03",
+    "eventEnd": "2026-08-07",
+    "location": "港区三田3-5-27 住友不動産東京三田サウスタワー",
+    "mypageUrl": "https://axol.jp/zw/s/exeo-digitalsolutions_28/mypage/login",
+    "memo": "予約済み"
+  },
+  {
+    "id": "seed-totec",
+    "company": "トーテック",
+    "course": "ぶつからない車の設計",
+    "status": "結果待ち",
+    "eventStart": "2026-08-17",
+    "eventEnd": "2026-08-21",
+    "mypageUrl": "https://mypage.3010.i-webs.jp/totec2028/",
+    "memo": "抽選待ち"
+  },
+  {
+    "id": "seed-mitani",
+    "company": "三谷コンピュータ",
+    "course": "オープンカンパニー東京支社",
+    "status": "参加確定",
+    "eventStart": "2026-07-30",
+    "eventEnd": "2026-07-30",
+    "location": "東京",
+    "mypageUrl": "https://mypage.3030.i-webs.jp/mtn2028/"
+  },
+  {
+    "id": "seed-fuji-electric",
+    "company": "富士電機",
+    "course": "",
+    "status": "結果待ち",
+    "deadline": "2026-06-14",
+    "mypageUrl": "https://www.e2r.jp/ja/fujielectric2028/",
+    "memo": "書類選考のみ・提出済み\n7月中に結果が届く"
+  },
+  {
+    "id": "seed-jcom",
+    "company": "JCOM",
+    "course": "ITエンジニアコース",
+    "status": "応募予定",
+    "deadline": "2026-07-13",
+    "mypageUrl": "https://jcom.snar.jp/mypage/index.aspx",
+    "memo": "夏期＆冬期オープンカンパニー"
+  },
+  {
+    "id": "seed-otsuka",
+    "company": "大塚商会",
+    "course": "",
+    "status": "気になる",
+    "mypageUrl": "https://www.e2r.jp/ja/otsuka_shokai2028/",
+    "memo": "あまり良いコースなし"
+  },
+  {
+    "id": "seed-tamadic",
+    "company": "タマディック",
+    "course": "体感型1day・2daysセミナー『未来設計ラボNEO』",
+    "status": "参加確定",
+    "eventStart": "2026-09-01",
+    "location": "【東京】AP東新宿 Bルーム(東急ステイ新宿イーストサイド３F) 〒160-0021　東京都新宿区歌舞伎町2-3-24",
+    "mypageUrl": "https://mypage.3030.i-webs.jp/tamadic2028/",
+    "memo": "9/1〜開催"
+  },
+  {
+    "id": "seed-hitachi-sol",
+    "company": "日立ソリューションズ",
+    "course": "8days（IT刷新/CI-CD等）",
+    "status": "不参加・見送り",
+    "deadline": "2026-06-14",
+    "eventStart": "2026-08-24",
+    "eventEnd": "2026-09-02",
+    "mypageUrl": "https://mypage.3030.i-webs.jp/hitachi-solutions2028/",
+    "memo": "結果通知: 6/21以降"
+  },
+  {
+    "id": "seed-dnp",
+    "company": "DNP",
+    "course": "第1希望 ： テーマ33:安全システムおよび支援ツールの開発",
+    "status": "不参加・見送り",
+    "deadline": "2026-06-28",
+    "eventStart": "2026-08-31",
+    "eventEnd": "2026-09-04",
+    "mypageUrl": "https://dnp.i-web.jpn.com/2028/",
+    "memo": "カメラ付きwebテストのため"
+  },
+  {
+    "id": "seed-his",
+    "company": "HIS",
+    "course": "ハッカソン2026（10日間アプリ開発）",
+    "status": "結果待ち",
+    "eventStart": "2026-08-10",
+    "eventEnd": "2026-08-21",
+    "location": "東京新宿",
+    "mypageUrl": "https://mypage.3030.i-webs.jp/his2028/",
+    "memo": "8月10.11.12.13.14~17.18.19.20.21の計10日間 / 結果通知: 7月中"
+  },
+  {
+    "id": "seed-hitachi",
+    "company": "日立製作所",
+    "course": "仕事体験ワークショップ",
+    "status": "応募予定",
+    "mypageUrl": "https://www.e2r.jp/ja/hitachi2028/career_edu/",
+    "memo": "6/29から2次選考 / 開催10〜2月 / 別途WS応募受付8/1から"
+  },
+  {
+    "id": "seed-ibm",
+    "company": "IBM",
+    "course": "ITスペシャリストコース",
+    "status": "不参加・見送り",
+    "mypageUrl": "https://axol.jp/zw/s/ibm_group_28/mypage/login",
+    "memo": "適性検査受験忘れ"
+  },
+  {
+    "id": "seed-scsk",
+    "company": "SCSK",
+    "course": "",
+    "status": "不参加・見送り",
+    "deadline": "2026-06-22",
+    "mypageUrl": "https://mypage.1050.i-web.jpn.com/scsk2028/",
+    "memo": "カメラ付きwebテストのため見送り"
+  },
+  {
+    "id": "seed-nttdata-mse",
+    "company": "NTTデータMSE",
+    "course": "3days仕事体験（神奈川県横浜市）",
+    "status": "参加確定",
+    "eventStart": "2026-08-26",
+    "eventEnd": "2026-08-28",
+    "location": "横浜新横浜",
+    "mypageUrl": "https://nttdmse-recruit.snar.jp/login.aspx",
+    "memo": "年収・知名度低め"
+  },
+  {
+    "id": "seed-toyota",
+    "company": "トヨタ自動車",
+    "course": "",
+    "status": "気になる",
+    "mypageUrl": "https://toyota-saiyo.snar.jp/jobboard/detail.aspx?id=4-LhvN43BEQrraJl1GqFKw",
+    "memo": "未着手"
+  },
+  {
+    "id": "e60ffb9d-5b5a-44ca-9e39-e10c4ea0c12d",
+    "company": "富士電機",
+    "course": "B60.東京工場／生成AIを活用した、次世代データ検索ツールの開発体験8/31～9/4",
+    "status": "結果待ち",
+    "eventStart": "2026-08-31",
+    "eventEnd": "2026-09-04",
+    "mypageUrl": "https://www.e2r.jp/ja/fujielectric2028/",
+    "memo": "合否に関わらず、7月中を目途に書類選考結果"
+  },
+  {
+    "id": "2d05d286-d270-4f05-8f4c-82de36e14e4c",
+    "company": "NTTインテグレーション株式会社",
+    "course": "",
+    "status": "応募予定",
+    "deadline": "2026-07-24",
+    "eventStart": "2026-08-24",
+    "eventEnd": "2026-08-28",
+    "mypageUrl": "https://mypage.3030.i-webs.jp/nic-newgraduate2028/applicant/top/index/"
+  },
+  {
+    "id": "1e1c6231-50cd-48a1-90ea-15f90a483feb",
+    "company": "BIPROGY",
+    "course": "",
+    "status": "不参加・見送り",
+    "mypageUrl": "https://mypage.3070.i-webs.jp/BIPROGY2028/",
+    "memo": "データサイエンティストにはならないため。"
+  },
+  {
+    "id": "15c4b67a-0d02-4758-96cc-042a3c9d281d",
+    "company": "NTTドコモ",
+    "course": "",
+    "status": "不参加・見送り",
+    "mypageUrl": "https://docomo-recruit.snar.jp/login.aspx",
+    "memo": "適性検査受験忘れ"
+  },
+  {
+    "id": "6db3d03f-e188-4f8c-b491-c2c368f27475",
+    "company": "トヨタシステムズ",
+    "course": "トヨタ-自動車用品メーカー間の用品開発業務向けWeb3Dアプリ開発体験",
+    "status": "結果待ち",
+    "deadline": "2026-06-25",
+    "eventStart": "2026-09-07",
+    "eventEnd": "2026-09-18",
+    "location": "愛知",
+    "mypageUrl": "https://axol.jp/zw/s/ts_28/mypage/login",
+    "memo": "7月中旬頃に結果"
+  },
+  {
+    "id": "ab522e90-9e35-4855-a70a-1d1d7d0f8097",
+    "company": "ソルト株式会社",
+    "course": "",
+    "status": "応募予定"
+  },
+  {
+    "id": "86474681-173a-4ad5-a120-ca10234241d7",
+    "company": "CASIO",
+    "course": "ソフトウェア開発職インターンシップ",
+    "status": "不参加・見送り",
+    "deadline": "2026-06-30",
+    "eventStart": "2026-09-08",
+    "eventEnd": "2026-09-10",
+    "mypageUrl": "https://mypage.3030.i-webs.jp/casio2028/applicant/top/index",
+    "memo": "テストセンターだるいから無し"
+  },
+  {
+    "id": "379650f1-10f0-4608-8edc-3fc0a8d4fe7a",
+    "company": "OLYMPUS",
+    "course": "【ソフト】IT／アプリケーションソフトウェア開発",
+    "status": "結果待ち",
+    "resultDate": "2026-07-01",
+    "eventStart": "2026-07-17",
+    "eventEnd": "2026-07-30",
+    "mypageUrl": "https://mypage.3010.i-webs.jp/olympus2028/",
+    "memo": "7月初旬~中旬頃結果届く"
+  },
+  {
+    "id": "011c0f79-924f-4607-b3ff-01bbdd57ca93",
+    "company": "NTT東日本",
+    "course": "ソフトウェア開発：ネットワーク事業推進本部受入",
+    "status": "不参加・見送り",
+    "deadline": "2026-06-30",
+    "eventStart": "2026-08-17",
+    "eventEnd": "2026-08-21",
+    "mypageUrl": "https://ntteast-recruit.snar.jp/mypage/index.aspx"
+  },
+  {
+    "id": "34ed7297-b4f9-485d-b31e-24f0c3489ea5",
+    "company": "株式会社フルマークス",
+    "course": "",
+    "status": "参加確定",
+    "eventStart": "2026-09-07",
+    "eventEnd": "2026-09-11"
+  },
+  {
+    "id": "1171b8ba-317e-4c7d-b08a-ec4bf6603464",
+    "company": "JSOL",
+    "course": "現場体験型インターンシップ「REAL」",
+    "status": "不参加・見送り",
+    "deadline": "2026-06-29",
+    "mypageUrl": "https://mypage.3010.i-webs.jp/jsol2028/applicant/top/index/pra/bhicbbgdic-ccb"
+  },
+  {
+    "id": "30ba67c7-20a3-4f5a-b9d9-47058aa48ccb",
+    "company": "あ",
+    "course": "",
+    "status": "気になる"
+  }
+]

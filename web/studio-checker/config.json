@@ -1,0 +1,65 @@
+{
+  "stores": [
+    {
+      "site": "buzz",
+      "store": "machida",
+      "label": "BUZZ町田"
+    },
+    {
+      "site": "buzz",
+      "store": "sagamihara",
+      "label": "BUZZ相模原"
+    },
+    {
+      "site": "worcle",
+      "store": "shinjuku",
+      "label": "worcle新宿"
+    },
+    {
+      "site": "worcle",
+      "store": "shibuya",
+      "label": "worcle渋谷"
+    }
+  ],
+  "defaults": {
+    "from": "18:00",
+    "to": "23:00",
+    "min_hours": 1.0
+  },
+  "watches": [
+    {
+      "name": "土日の練習",
+      "weekdays": [
+        "土",
+        "日"
+      ],
+      "days_ahead": 14,
+      "from": "18:00",
+      "to": "22:00",
+      "min_hours": 2,
+      "stores": [
+        "BUZZ町田",
+        "BUZZ相模原"
+      ]
+    },
+    {
+      "name": "11/8 チーム練",
+      "dates": [
+        "2026-11-08"
+      ],
+      "from": "13:00",
+      "to": "20:00",
+      "min_hours": 3,
+      "stores": [
+        "BUZZ町田",
+        "worcle新宿"
+      ],
+      "rooms": [
+        "401st",
+        "501st",
+        "401",
+        "501"
+      ]
+    }
+  ]
+}

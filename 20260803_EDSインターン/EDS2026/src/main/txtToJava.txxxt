@@ -1,0 +1,9 @@
+@echo off
+setlocal enabledelayedexpansion
+
+for /r %%f in (*.txt) do (
+    set "newname=%%~dpnf.txt"
+    ren "%%f" "%%~nf.java"
+)
+
+echo Done!

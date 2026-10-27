@@ -1,0 +1,107 @@
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+/**
+ * Servlet implementation class LoginServlet
+ */
+@WebServlet("/HanteiCsv")
+public class HanteiCsvServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		// -------- 文字コード設定 --------
+		//request.setCharacterEncoding("UTF-8");
+
+		// CSVファイルのパスを指定
+		String csvFilePath = "../workspace/EDS2025/uranai.csv";
+
+		// -------- 占い結果生成  --------
+		String q1String = request.getParameter("q1");
+		String q2String = request.getParameter("q2");
+		String ageString = request.getParameter("age");
+		String heightString = request.getParameter("height");
+		String birthString = request.getParameter("birth");
+		// 入力値を数値に変換する
+		int q1 = Integer.parseInt(q1String);
+		int q2 = Integer.parseInt(q2String);
+		int age = Integer.parseInt(ageString);
+		int height = Integer.parseInt(heightString);
+		int birth = Integer.parseInt(birthString);
+
+		// 画面に返却する文字列
+		String q1returnStr = "大凶";
+		String q2returnStr = "大凶";
+		String agereturnStr = "大凶";
+		String heightreturnStr = "大凶";
+		String birthreturnStr = "大凶";
+
+		try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
+
+			String line;
+			List<String[]> dataList = new ArrayList<>();
+			while ((line = br.readLine()) != null) {
+				String[] values = line.split(",");
+				dataList.add(values);
+			}
+
+			String[] q1ResultHairetsu = getDataHairetsu(dataList, q1);
+			q1returnStr = getData(q1ResultHairetsu, 0);
+
+			String[] q2ResultHairetsu = getDataHairetsu(dataList, q2);
+			q2returnStr = getData(q2ResultHairetsu, 1);
+
+			String[] ageResultHairetsu = getDataHairetsu(dataList, age);
+			agereturnStr = getData(ageResultHairetsu, 2);
+
+			String[] heightResultHairetsu = getDataHairetsu(dataList, height);
+			heightreturnStr = getData(heightResultHairetsu, 3);
+
+			String[] birthResultHairetsu = getDataHairetsu(dataList, birth);
+			birthreturnStr = getData(birthResultHairetsu, 4);
+
+			// -------- リクエストに占い結果を追加（setAttribute）--------	
+			request.setAttribute("q1result", q1returnStr);
+			request.setAttribute("q2result", q2returnStr);
+			request.setAttribute("ageresult", agereturnStr);
+			request.setAttribute("heightresult", heightreturnStr);
+			request.setAttribute("birthresult", birthreturnStr);
+			// -------- JSPへ転送（forward）--------
+			RequestDispatcher rd = request.getRequestDispatcher("/UranaiResultCsv.jsp");
+			rd.forward(request, response);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * ▼▼▼▼▼各処理メソッド▼▼▼▼▼
+	 */
+	// 引数1から引数2と同じ行数に格納されている値を返却する
+	public String[] getDataHairetsu(List<String[]> dataList, int num) {
+		// 返却用の変数に引数1から引数2と同じ行数に格納されている値を格納する
+		String[] resultHairetsu = dataList.get(num);
+		return resultHairetsu;
+	}
+
+	// 引数1の文字列配列から引数2の場所に格納されている値を返却する
+	public String getData(String[] resultHairetsu, int i) {
+		// 返却用の変数に引数1の配列から引数2の場所に格納されている値を格納する
+		String result = resultHairetsu[i];
+		return result;
+	}
+
+}

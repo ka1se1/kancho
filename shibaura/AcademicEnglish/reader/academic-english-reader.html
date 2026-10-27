@@ -1,0 +1,733 @@
+<title>AcademicEnglish</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* Layout: paragraph rows, English left / Japanese right, sentence-linked highlight; stacks on phones */
+:root {
+  --bg: #F6F7F9;
+  --paper: #FFFFFF;
+  --fg: #1C2331;
+  --muted: #5E6878;
+  --line: #DDE2EA;
+  --accent: #2A55B8;
+  --marker: #FFE27A;
+  --marker-soft: #FFF3C2;
+  --true: #1E7A4C;
+  --false: #B3261E;
+  --f-en: Calibri, "Carlito", "Segoe UI", sans-serif;
+  --f-ja: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151C; --paper: #181D26; --fg: #E3E7EE; --muted: #9AA4B4; --line: #2A3140;
+    --accent: #8EAEFF; --marker: rgba(255, 210, 80, .38); --marker-soft: rgba(255, 210, 80, .14);
+    --true: #6FD3A0; --false: #FF8A80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151C; --paper: #181D26; --fg: #E3E7EE; --muted: #9AA4B4; --line: #2A3140;
+  --accent: #8EAEFF; --marker: rgba(255, 210, 80, .38); --marker-soft: rgba(255, 210, 80, .14);
+  --true: #6FD3A0; --false: #FF8A80; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-en); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 64px; display: grid; gap: 28px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-size: clamp(26px, 4vw, 34px); line-height: 1.2; text-wrap: balance; }
+.hint { margin: 0; color: var(--muted); font-family: var(--f-ja); font-size: 14px; }
+.units button { all: unset; cursor: pointer; font-size: 14px; font-weight: 700; padding: 5px 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--paper); color: var(--muted); }
+.units button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.units button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.qja { display: block; font-family: var(--f-ja); font-size: 13px; color: var(--muted); }
+#passages, #quizzes { display: grid; gap: 28px; }
+.quiz { scroll-margin-top: 16px; }
+.quiz h2 .ja-title { font-family: var(--f-ja); font-size: 14px; font-weight: 400; color: var(--muted); }
+nav { display: flex; flex-wrap: wrap; gap: 8px; }
+.solver { background: var(--paper); border: 2px solid var(--accent); border-radius: 10px; padding-block: 20px; padding-inline: clamp(16px, 3vw, 32px); display: grid; gap: 10px; scroll-margin-top: 16px; }
+.sv-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.sv-head h2 { margin: 0; font-size: 20px; font-family: var(--f-ja); }
+.sv-label { font-size: 13px; color: var(--muted); font-family: var(--f-ja); }
+#sv-text { width: 100%; font: 15px/1.6 var(--f-en); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; resize: vertical; }
+#sv-text:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sv-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.sv-spacer { flex: 1; }
+.sv-file { font-family: var(--f-ja); font-size: 14px; color: var(--accent); border: 1px dashed var(--accent); border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+.sv-file input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.sv-file:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sv-files { font-size: 13px; color: var(--muted); font-family: var(--f-ja); min-width: 0; }
+.sv-btn { font-family: var(--f-ja); font-size: 15px; font-weight: 700; padding: 7px 22px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: var(--paper); cursor: pointer; }
+.sv-btn.ghost { background: transparent; color: var(--accent); font-weight: 500; padding-inline: 14px; }
+.sv-btn:disabled { opacity: .5; cursor: default; }
+.sv-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sv-status { margin: 0; min-height: 1.4em; font-family: var(--f-ja); font-size: 14px; color: var(--muted); }
+.sv-out { display: grid; gap: 12px; }
+.sv-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; min-width: 0; }
+.sv-q { font-weight: 700; }
+.sv-qja, .sv-why { font-family: var(--f-ja); font-size: 14px; color: var(--muted); }
+.sv-why { color: var(--fg); }
+.sv-ans { font-size: 17px; }
+.sv-ans b { color: var(--true); }
+.sv-ans .ja { display: inline; font-size: 14px; color: var(--muted); }
+.sv-ev { display: grid; gap: 6px; }
+.sv-ev button { all: unset; box-sizing: border-box; cursor: pointer; border-left: 3px solid var(--marker); background: var(--marker-soft); padding: 6px 10px; border-radius: 0 6px 6px 0; font-size: 14px; line-height: 1.5; }
+.sv-ev button:hover, .sv-ev button:focus-visible { background: var(--marker); }
+.sv-ev button:focus-visible { outline: 2px solid var(--accent); }
+.sv-ev small { display: block; font-family: var(--f-ja); color: var(--muted); font-size: 12px; }
+.sv-none { font-family: var(--f-ja); font-size: 13px; color: var(--false); }
+nav a { font-size: 14px; color: var(--accent); text-decoration: none; border: 1px solid var(--line); padding: 4px 12px; border-radius: 999px; background: var(--paper); }
+nav a:hover, nav a:focus-visible { border-color: var(--accent); }
+
+section.passage { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding-block: 24px; padding-inline: clamp(16px, 3vw, 32px); display: grid; gap: 18px; scroll-margin-top: 16px; }
+.p-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+.p-head h2 { margin: 0; font-size: 22px; }
+.p-head .ja-title { font-family: var(--f-ja); color: var(--muted); font-size: 15px; }
+.colhead { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 32px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 32px; padding-block: 6px; }
+.row + .row { border-top: 1px dashed var(--line); padding-top: 14px; }
+.en, .ja { margin: 0; min-width: 0; }
+.en { font-size: 17px; line-height: 1.7; }
+.ja { font-family: var(--f-ja); font-size: 15px; line-height: 1.9; color: var(--fg); }
+.pn { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 6px; }
+
+.s { border-radius: 3px; cursor: pointer; transition: background-color .12s ease, box-shadow .12s ease; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.s:hover { background: var(--marker-soft); }
+.s.on { background: var(--marker); box-shadow: 0 0 0 2px var(--marker); }
+.s:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.s.pinned { box-shadow: 0 0 0 2px var(--marker), inset 0 -2px 0 var(--accent); }
+
+.q { display: inline-block; font-family: var(--f-en); font-size: 11px; font-weight: 700; line-height: 1; padding: 3px 5px; margin: 0 3px; border-radius: 4px; vertical-align: 2px; color: var(--paper); background: var(--accent); }
+.q.t { background: var(--true); }
+.q.f { background: var(--false); }
+
+.quiz { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding-block: 20px; padding-inline: clamp(16px, 3vw, 32px); display: grid; gap: 12px; }
+.quiz h2 { margin: 0; font-size: 20px; }
+.quiz ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.quiz button { all: unset; box-sizing: border-box; width: 100%; display: grid; grid-template-columns: 44px minmax(64px,auto) minmax(0,1fr); gap: 10px; align-items: baseline; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+.quiz button:hover, .quiz button:focus-visible { background: var(--marker-soft); }
+.quiz button:focus-visible { outline: 2px solid var(--accent); }
+.quiz .num { font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.quiz .ans { font-weight: 700; }
+.quiz .ans.t { color: var(--true); }
+.quiz .ans.f { color: var(--false); }
+.quiz .txt { min-width: 0; }
+.qprompt { margin: 0; display: grid; gap: 4px; padding: 10px 14px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); }
+.qprompt .en { font-size: 15px; line-height: 1.6; }
+.qprompt .ja { font-size: 13px; line-height: 1.7; color: var(--muted); }
+
+@media (max-width: 760px) {
+  .colhead { display: none; }
+  .row { grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .ja { padding-left: 12px; border-left: 3px solid var(--line); }
+  .quiz button { grid-template-columns: 40px minmax(52px,auto) minmax(0,1fr); }
+}
+@media (prefers-reduced-motion: reduce) { .s { transition: none; } html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="wrap">
+  <header>
+    <nav class="units" id="units" aria-label="Unit"></nav>
+    <div class="eyebrow" id="eyebrow"></div>
+    <h1 id="utitle"></h1>
+    <p class="hint">英文（または和訳）にカーソルを当てると、対応する文が強調されます。クリック／タップで固定、もう一度押すと解除。<span class="q t">Q1</span> は問題の根拠です（緑 = True、赤 = False、青 = それ以外の問題）。</p>
+    <nav id="jump" aria-label="セクション"></nav>
+  </header>
+  <div id="passages"></div>
+  <div id="quizzes"></div>
+  <section class="solver" id="solver">
+    <div class="sv-head">
+      <h2>テスト問題を解く</h2>
+      <span class="ja-title" id="sv-scope"></span>
+    </div>
+    <p class="hint">問題文を貼り付ける（または画面の画像を追加する）と、このUnitの本文から答えと根拠を探します。根拠を押すと本文のその文が強調されます。</p>
+    <label class="sv-label" for="sv-text">問題文</label>
+    <textarea id="sv-text" rows="7" placeholder="例）Q1. According to the passage, why is academic English important for engineering students?&#10;(a) ... (b) ... (c) ..."></textarea>
+    <div class="sv-row">
+      <label class="sv-file" id="sv-file-wrap" hidden>画像を追加<input type="file" id="sv-file" accept="image/*" multiple></label>
+      <span class="sv-files" id="sv-files"></span>
+      <span class="sv-spacer"></span>
+      <button type="button" class="sv-btn ghost" id="sv-clear">クリア</button>
+      <button type="button" class="sv-btn ghost" id="sv-stop" hidden>停止</button>
+      <button type="button" class="sv-btn" id="sv-go">解く</button>
+    </div>
+    <p class="sv-status" id="sv-status" role="status"></p>
+    <div id="sv-out" class="sv-out"></div>
+  </section>
+</div>
+
+<script>
+// Add one object per class. passages: sentence pairs [en, ja, [quiz ids]] (start: first ¶ number);
+// quizzes: { title, short, ja, prompt: [[en, ja], ...] (the handout's question text), items: [question, answer, ja, id] }
+const UNITS = [
+  { id: "u1", label: "Unit 1", title: "Academic English Proficiency and Research Paper Writing",
+    passages: [
+  { id: "p11", title: "Reading Passage 1.1　Academic English Proficiency", ja: "アカデミック英語の運用能力", paras: [
+    [
+      ["Academic English proficiency is essential for engineering and science majors, as it supports both academic achievement and professional development.", "アカデミック英語の運用能力は、工学・理学を専攻する学生にとって不可欠である。学業上の成果と職業上の成長の両方を支えるからである。", [1]],
+      ["In university settings, students must read and understand complex technical materials, write research papers, and communicate their ideas clearly in written and spoken forms.", "大学では、学生は複雑な技術資料を読んで理解し、研究論文を書き、自分の考えを文章と口頭の両方で明確に伝えなければならない。"],
+      ["Strong academic English skills enable students to engage with international research communities, where English is the dominant language of scholarly communication.", "高いアカデミック英語力があれば、英語が学術コミュニケーションの主要言語である国際的な研究コミュニティに参加できる。", [2]]
+    ],
+    [
+      ["In research paper writing, academic English plays a central role in structuring and presenting knowledge effectively.", "研究論文の執筆において、アカデミック英語は知識を効果的に構成し提示するうえで中心的な役割を果たす。"],
+      ["Students are expected to organize their papers into clear sections—such as introduction, methodology, results, and discussion—while maintaining logical coherence and clarity.", "学生は、論理的な一貫性と明確さを保ちながら、序論・方法・結果・考察といった明確な章立てで論文を構成することが求められる。", [3]],
+      ["They must develop evidence-based arguments, use appropriate technical vocabulary, and follow academic conventions such as citation and referencing.", "また、根拠に基づく議論を展開し、適切な専門用語を使い、引用や参考文献の記載といった学術的慣習に従わなければならない。"],
+      ["Precision and objectivity are particularly important, as research writing requires accurate description of methods, careful interpretation of data, and avoidance of ambiguity.", "研究論文では方法の正確な記述、データの慎重な解釈、あいまいさの回避が求められるため、正確さと客観性が特に重要である。"],
+      ["In addition, the use of hedging expressions (e.g., “This result suggests that…”) allows writers to present claims cautiously and appropriately within the academic context.", "さらに、ヘッジング表現（例：「この結果は…を示唆している」）を使うことで、書き手は学術的な文脈の中で主張を慎重かつ適切に示すことができる。", [5]]
+    ],
+    [
+      ["Academic English is also crucial for delivering effective academic presentations.", "アカデミック英語は、効果的な学術発表を行ううえでも極めて重要である。"],
+      ["In conferences, seminars, and classroom settings, students and researchers must present their findings in a clear, structured, and engaging manner.", "学会、セミナー、授業などの場で、学生や研究者は研究成果を明確で、構成がしっかりした、聞き手を引きつける形で発表しなければならない。"],
+      ["This includes explaining complex concepts, guiding the audience through visual materials such as slides or graphs, and responding to questions.", "これには、複雑な概念を説明すること、スライドやグラフなどの視覚資料を使って聴衆を導くこと、質問に答えることが含まれる。", [6, 7]],
+      ["Effective presentation skills require not only language proficiency but also the ability to organize information logically, emphasize key points, and adapt explanations to different audiences.", "効果的な発表には語学力だけでなく、情報を論理的に整理し、要点を強調し、聴衆に応じて説明を調整する能力も必要である。"],
+      ["These skills are essential for sharing research outcomes and participating in scholarly discussions.", "こうした能力は、研究成果を共有し、学術的な議論に参加するために欠かせない。"]
+    ],
+    [
+      ["Beyond academia, academic English proficiency is highly valuable in the professional workplace.", "学術の場を超えて、アカデミック英語の運用能力は職場でも非常に価値がある。", [1]],
+      ["In many engineering and scientific fields, English functions as the global lingua franca, especially in multinational companies and international research collaborations.", "多くの工学・科学分野、特に多国籍企業や国際共同研究では、英語が世界共通語として機能している。", [8]],
+      ["Professionals are often required to write technical reports, project documentation, emails, and proposals in English, as well as to participate in meetings and deliver presentations.", "専門職の人々は、技術報告書、プロジェクト資料、メール、提案書を英語で書き、会議に参加し、プレゼンテーションを行うことがしばしば求められる。", [8]],
+      ["The ability to communicate clearly and precisely helps prevent misunderstandings, ensures efficient collaboration, and enhances the credibility of individuals and organizations.", "明確かつ正確にコミュニケーションをとる能力は、誤解を防ぎ、効率的な協働を確かなものにし、個人や組織の信頼性を高める。", [10]],
+      ["Moreover, employees who possess strong academic English skills are better prepared to interpret technical information, contribute to innovation, and work effectively in global teams.", "さらに、高いアカデミック英語力を持つ社員は、技術情報を解釈し、イノベーションに貢献し、グローバルなチームで効果的に働くための準備がよりできている。", [10]]
+    ],
+    [
+      ["Academic English is characterized by a formal tone, precise vocabulary, and a logical, well-organized structure.", "アカデミック英語の特徴は、フォーマルな口調、正確な語彙、そして論理的でよく整理された構成である。", [9]],
+      ["It emphasizes clarity, objectivity, and critical thinking, making it suitable for scholarly and professional communication.", "明確さ、客観性、批判的思考を重視するため、学術的・職業的なコミュニケーションに適している。", [9]],
+      ["Writers are expected to avoid informal expressions and instead use discipline-specific terminology and carefully constructed sentences.", "書き手はくだけた表現を避け、分野特有の専門用語と注意深く組み立てた文を使うことが求められる。", [4]],
+      ["Ideas are typically developed in coherent paragraphs with clear transitions, allowing readers or listeners to follow complex arguments with ease.", "考えは通常、明確なつなぎを持つ一貫した段落の中で展開され、読み手や聞き手が複雑な議論を容易に追えるようになっている。"]
+    ],
+    [
+      ["Key features of academic English include the use of evidence-based reasoning, proper citation of sources, and a critical approach to evaluating information.", "アカデミック英語の主な特徴には、根拠に基づく推論、出典の適切な引用、情報を批判的に評価する姿勢がある。"],
+      ["Whether in research papers, presentations, or workplace communication, accuracy and clarity are essential.", "研究論文でも、発表でも、職場でのコミュニケーションでも、正確さと明確さが不可欠である。"],
+      ["Mastery of academic English enables students not only to succeed in their studies but also to transition smoothly into professional environments, where effective communication is a key factor in career advancement and international collaboration.", "アカデミック英語を習得すれば、学生は学業で成功するだけでなく、効果的なコミュニケーションがキャリアアップと国際協力の重要な要素となる職業の世界へ、スムーズに移行できるようになる。"]
+    ]
+  ]},
+  { id: "p12", title: "Reading Passage 1.2　Research Paper Writing", ja: "研究論文の執筆", paras: [
+    [
+      ["Research paper writing is the process of composing a scholarly document that explores, analyzes, and presents an in-depth examination of a specific topic or question.", "研究論文の執筆とは、特定のテーマや問いを探究・分析し、掘り下げた考察として示す学術文書を書く過程である。"],
+      ["In the field of academic writing in English, it involves gathering and evaluating relevant information from credible sources, formulating a thesis or research question, and presenting findings in a structured and coherent manner.", "英語のアカデミック・ライティングの分野では、信頼できる情報源から関連情報を集めて評価し、主張（テーゼ）や研究課題を設定し、得られた知見を構造的かつ一貫した形で示すことが含まれる。"],
+      ["Research paper writing is essential for advancing knowledge in various fields by providing evidence-based insights and contributing to ongoing scholarly discussions.", "研究論文の執筆は、根拠に基づく洞察を提供し、進行中の学術的議論に貢献することで、さまざまな分野の知識を前進させるために不可欠である。"]
+    ],
+    [
+      ["The process of writing a research paper includes several key stages: first, identifying a research problem or question; next, conducting a thorough literature review to understand existing research on the topic; then, designing a research methodology to collect and analyze data; and finally, presenting the results, discussing their implications, and drawing conclusions.", "研究論文を書く過程には、いくつかの重要な段階がある。まず研究課題や問いを特定し、次にそのテーマに関する既存の研究を理解するために徹底的な文献調査を行い、さらにデータを収集・分析するための研究方法を設計し、最後に結果を示してその意味を考察し、結論を導く。"],
+      ["Throughout this process, academic writers must follow formal writing conventions, use clear and precise language, and follow specific citation and formatting guidelines, such as APA, MLA, or Chicago style, to maintain academic integrity.", "この過程全体を通じて、学術的な書き手は正式な文章の慣習に従い、明確で正確な言葉を使い、学術的誠実性を保つために APA、MLA、Chicago スタイルなどの特定の引用・書式ガイドラインに従わなければならない。"]
+    ],
+    [
+      ["In academic English, research paper writing requires writers to engage critically with sources, organize information logically, and present arguments supported by evidence.", "アカデミック英語において、研究論文の執筆では、書き手が情報源に批判的に向き合い、情報を論理的に整理し、根拠に裏付けられた議論を示すことが求められる。"],
+      ["The goal is not just to summarize existing knowledge, but to analyze and synthesize information to generate new insights.", "目的は既存の知識を要約することだけではなく、情報を分析・統合して新たな洞察を生み出すことである。"],
+      ["This type of writing helps foster a deeper understanding of complex issues and encourages scholarly communication within the academic community.", "この種の執筆は、複雑な問題へのより深い理解を促し、学術コミュニティ内での学術的コミュニケーションを促進する。"]
+    ]
+  ]}
+],
+    quizzes: [
+      { title: "A. True or False", ja: "正誤問題",
+        prompt: [["Comprehension Questions & Answer Keys for the Reading Passage — A. True or False Questions", "本文の読解問題と解答 — A. 正誤問題（各文が本文の内容と合っていれば True、合っていなければ False）"]], items: [
+        ["Academic English proficiency is only important for academic success, not for professional careers.", false, "アカデミック英語の運用能力は学業での成功にのみ重要であり、職業上のキャリアには重要でない。"],
+        ["English is widely used as the primary language in international research communities.", true, "英語は国際的な研究コミュニティで主要な言語として広く使われている。"],
+        ["Research papers typically include sections such as introduction, methodology, results, and discussion.", true, "研究論文には通常、序論、方法、結果、考察などの章が含まれる。"],
+        ["Academic writing encourages the use of informal expressions and casual language.", false, "アカデミック・ライティングでは、くだけた表現や砕けた言葉づかいが推奨される。"],
+        ["Hedging expressions are used to make statements more cautious and precise.", true, "ヘッジング表現は、主張をより慎重かつ正確にするために使われる。"],
+        ["Academic presentations do not require interaction with the audience.", false, "学術発表では聴衆とのやり取りは必要ない。"],
+        ["Visual materials such as slides and graphs are often used in academic presentations.", true, "学術発表では、スライドやグラフなどの視覚資料がよく使われる。"],
+        ["In professional workplaces, English is rarely used in technical communication.", false, "職場では、技術的なコミュニケーションに英語はほとんど使われない。"],
+        ["Academic English emphasizes clarity, objectivity, and logical organization.", true, "アカデミック英語は、明確さ、客観性、論理的な構成を重視する。"],
+        ["Strong academic English skills can improve collaboration in international teams.", true, "高いアカデミック英語力は、国際チームでの協働を向上させうる。"]
+      ]}
+    ]
+  },
+  { id: "u2", label: "Unit 2", title: "Academic Research Papers in Engineering and Science: Publication, Structure, and Format",
+    passages: [
+  { id: "p21", title: "Reading Passage 2.1　Publishing an Academic Research Paper", ja: "学術論文の出版", paras: [
+    [
+      ["Publishing an academic research paper involves several key steps, beginning with the submission of the manuscript and ending with its publication if it is accepted.", "学術論文の出版にはいくつかの重要な段階があり、原稿の投稿から始まり、採択された場合は出版で終わる。"]
+    ],
+    [
+      ["First, researchers submit their paper to an appropriate academic journal or conference that aligns with their field of study.", "まず、研究者は自分の研究分野に合った適切な学術誌や学会に論文を投稿する。", ["(1)"]],
+      ["The submission must follow the journal's or conference's formatting and content guidelines.", "投稿は、その学術誌や学会の書式・内容に関するガイドラインに従わなければならない。"]
+    ],
+    [
+      ["Once submitted, the paper undergoes screening by the journal editor.", "投稿されると、論文は学術誌の編集者による審査（スクリーニング）を受ける。", ["(2)"]],
+      ["If it passes the editor's screening, it is sent to peer review, a process in which experts in the field called reviewers evaluate its quality, originality, and validity.", "編集者の審査を通過すると、論文は査読に回される。査読とは、査読者と呼ばれるその分野の専門家が、論文の質、独創性、妥当性を評価する過程である。", ["(3)"]],
+      ["Reviewers provide feedback and recommend whether the paper should be accepted, revised, or rejected.", "査読者はフィードバックを提供し、論文を採択、修正、不採択のいずれにすべきかを推薦する。"]
+    ],
+    [
+      ["After the peer review process, the paper may be accepted for publication, rejected, or sent back for revisions according to the editor’s assessment.", "査読の後、編集者の評価に従って、論文は出版に向けて採択されるか、不採択になるか、修正のために差し戻される。", ["(4)"]],
+      ["If major revisions are required, the authors must address the reviewers' comments and resubmit the paper for further evaluation.", "大幅な修正が求められた場合、著者は査読者のコメントに対応し、さらなる評価のために論文を再投稿しなければならない。", ["(5)"]]
+    ],
+    [
+      ["For conference papers, if accepted, the work is typically included in the conference proceedings, a collection of research papers presented at the event.", "会議論文の場合、採択されると、研究は通常、学会で発表された論文を集めたプロシーディングス（会議録）に収録される。"],
+      ["If the paper is accepted by a journal, it undergoes further editing before being officially published.", "学術誌に採択された場合は、正式に出版される前にさらに編集が行われる。", ["(6)"]]
+    ],
+    [
+      ["Overall, this process helps ensure the quality of research and contributes to the advancement of knowledge in the academic community.", "全体として、この過程は研究の質を保証し、学術コミュニティにおける知識の発展に貢献する。"]
+    ]
+  ]},
+  { id: "p22", title: "Reading Passage 2.2　Research Paper Structure", ja: "論文の基本構造", paras: [
+    [
+      ["A typical research paper follows a clear and organized structure.", "典型的な論文は、明確で整理された構成に従う。"],
+      ["Its exact structure varies by discipline and journal.", "正確な構成は分野や学術誌によって異なる。"],
+      ["However, the main body of a scientific or engineering paper commonly follows the IMRaD structure: Introduction, Method, Results, and Discussion.", "しかし、理工系論文の本文は一般に IMRaD 構造、すなわち序論（Introduction）、方法（Method）、結果（Results）、考察（Discussion）に従う。"],
+      ["In addition to these four sections, a research paper usually includes other elements, such as a title, author names, affiliations, an abstract, keywords, conclusions, and references.", "これら4つの章に加えて、論文には通常、タイトル、著者名、所属、要旨、キーワード、結論、参考文献などの要素が含まれる。"],
+      ["The main elements are as follows:", "主な要素は以下のとおりである。"]
+    ],
+    [
+      ["Title: It is a concise statement that shows the main topic or research question.", "タイトル：主なテーマや研究課題を示す簡潔な記述である。"],
+      ["It should be specific and informative.", "具体的で情報量のあるものにすべきである。"],
+      ["e.g., × Too general: A Study of Solar Panels → ○ Specific and informative: Effects of Dust on the Power Output of Solar Panels", "例：× 一般的すぎる「太陽光パネルに関する研究」→ ○ 具体的で情報量がある「ほこりが太陽光パネルの発電出力に及ぼす影響」"]
+    ],
+    [
+      ["Authors: This section lists the names of the people who conducted and wrote the research.", "著者：研究を行い執筆した人々の名前を記載する。"]
+    ],
+    [
+      ["Authors' Affiliations: These are the universities, companies, or research institutions to which the authors belong:", "著者の所属：著者が所属する大学、企業、研究機関である。"],
+      ["e.g., Shibaura Institute of Technology, Toyota Motor Corporation, or the National Institute of Advanced Industrial Science and Technology (AIST)", "例：芝浦工業大学、トヨタ自動車、産業技術総合研究所"]
+    ],
+    [
+      ["Abstract: It is a summary of the entire paper (usually around 150-300 words).", "要旨：論文全体の要約である（通常150〜300語程度）。"],
+      ["It usually includes the purpose, methods, main results, and conclusions of the study.", "通常、研究の目的、方法、主な結果、結論を含む。"]
+    ],
+    [
+      ["Keywords: They are important terms that represent the main topics of the paper.", "キーワード：論文の主なテーマを表す重要な用語である。"],
+      ["They help readers find the paper in databases: e.g., photovoltaic systems, energy efficiency, and renewable energy.", "読み手がデータベースで論文を見つける助けになる。例：太陽光発電システム、エネルギー効率、再生可能エネルギー。"]
+    ],
+    [
+      ["Introduction: This section explains the background and significance of the research, reviews relevant previous studies, and presents the research questions (RQs), objectives, or hypotheses.", "序論：研究の背景と意義を説明し、関連する先行研究を概観し、研究課題（RQ）、目的、または仮説を示す。"]
+    ],
+    [
+      ["Method: This section describes how the study was conducted.", "方法：研究がどのように行われたかを記述する。"],
+      ["It may include the research design, participants, materials, procedures, and methods of analysis.", "研究デザイン、参加者、材料、手順、分析方法を含むことがある。"],
+      ["It ensures that other researchers can replicate the work.", "他の研究者が研究を再現できるようにする。"]
+    ],
+    [
+      ["Results: This section presents the findings of the study, often using tables, graphs, or figures.", "結果：研究で得られた知見を、表、グラフ、図を使って示すことが多い。"],
+      ["The findings are usually reported without detailed interpretation.", "知見は通常、詳しい解釈を加えずに報告される。"]
+    ],
+    [
+      ["Discussion: This section interprets the results and relates them to the research questions and previous studies.", "考察：結果を解釈し、研究課題や先行研究と関連づける。"],
+      ["It may also explain the implications and limitations of the study and suggest directions for future research.", "研究の意義や限界を説明し、今後の研究の方向性を提案することもある。"]
+    ],
+    [
+      ["Conclusion: This section summarizes the main findings and their broader significance, providing a final perspective on the research.", "結論：主な知見とそのより広い意義をまとめ、研究についての最終的な見解を示す。"]
+    ],
+    [
+      ["Acknowledgement: This section recognizes people, organizations, or funding bodies that supported the research but are not listed as authors.", "謝辞：研究を支援したが著者には含まれない人々、組織、資金提供団体への謝意を示す。"]
+    ],
+    [
+      ["References: This section lists all the sources cited in the paper according to a specific citation style (e.g., IEEE, APA, MLA, Chicago).", "参考文献：論文中で引用したすべての文献を、特定の引用スタイル（例：IEEE、APA、MLA、Chicago）に従って記載する。"]
+    ],
+    [
+      ["Biography: It provides information about an author’s background, affiliations, and research interests.", "著者紹介：著者の経歴、所属、研究関心についての情報を示す。"],
+      ["It appears in some journals but is not an essential section of every paper.", "一部の学術誌に掲載されるが、すべての論文に必須の項目ではない。"]
+    ],
+    [
+      ["Appendix: It contains supplementary information, such as detailed data, calculations, or additional figures that are not included in the main text.", "付録：詳細なデータ、計算、追加の図など、本文に含まれない補足情報を収める。"]
+    ]
+  ]},
+  { id: "p2a", title: "A. Comparing Citation Styles", ja: "引用スタイルの比較", paras: [
+    [
+      ["Different academic fields use different citation styles.", "分野によって使われる引用スタイルは異なる。"],
+      ["The examples below show how the same paper is listed in four styles.", "以下の例は、同じ論文が4つのスタイルでどのように記載されるかを示している。"],
+      ["Notice the differences in author names, the position of the publication year, capitalization, punctuation, and the presentation of page numbers and the DOI (Digital Object Identifier: a unique and permanent code used to identify and find an academic publication online).", "著者名、出版年の位置、大文字の使い方、句読点、ページ番号と DOI（デジタルオブジェクト識別子：学術出版物をオンラインで識別・検索するための固有かつ恒久的なコード）の示し方の違いに注目しなさい。"]
+    ],
+    [
+      ["IEEE (Engineering, Computer Science): [1] Z.-H. Lin and S. Smith, “A natural user interface for realistic tactile perception of object surface texture,” in 2017 9th International Conference on Intelligent Human-Machine Systems and Cybernetics (IHMSC), vol. 2, 2017, pp. 370–373, doi: 10.1109/IHMSC.2017.194.", "IEEE（工学・コンピュータ科学）：番号 [1] を付ける。著者名は名をイニシャルにして先に書く（Z.-H. Lin）。論文名は“ ”で囲み、最初の語以外は小文字。年は会議名の後、ページは pp.、最後に doi:。"]
+    ],
+    [
+      ["APA (Social Sciences): Lin, Z.-H., & Smith, S. (2017). A natural user interface for realistic tactile perception of object surface texture. In 2017 9th International Conference on Intelligent Human-Machine Systems and Cybernetics (IHMSC) (Vol. 2, pp. 370–373). IEEE. https://doi.org/10.1109/IHMSC.2017.194", "APA（社会科学）：姓, イニシャル の順で & でつなぐ。出版年は著者名の直後に (2017)。論文名は“ ”なしで、最初の語だけ大文字。DOI は https://doi.org/ の形。"]
+    ],
+    [
+      ["MLA (Literature, Languages): Lin, Zih-Hao, and Shana Smith. “A Natural User Interface for Realistic Tactile Perception of Object Surface Texture.” 2017 9th International Conference on Intelligent Human-Machine Systems and Cybernetics (IHMSC), vol. 2, IEEE, 2017, pp. 370–73. https://doi.org/10.1109/IHMSC.2017.194.", "MLA（文学・言語）：筆頭著者は 姓, 名、2人目は 名 姓 で and でつなぐ。論文名は“ ”で囲み、各語の頭を大文字。年は出版社の後、ページは 370–73 と省略形。"]
+    ],
+    [
+      ["Chicago (History, Humanities): Lin, Zih-Hao, and Shana Smith. “A Natural User Interface for Realistic Tactile Perception of Object Surface Texture.” In 2017 9th International Conference on Intelligent Human-Machine Systems and Cybernetics (IHMSC), 2:370–73. IEEE, 2017. https://doi.org/10.1109/IHMSC.2017.194.", "Chicago（歴史学・人文学）：著者名と論文名は MLA と同じ形。In で会議名を示し、巻:ページ（2:370–73）の形で書く。年は出版社の後。"]
+    ]
+  ]},
+  { id: "p23", title: "Reading Passage 2.3　Research Paper Formatting", ja: "論文の書式", paras: [
+    [
+      ["Properly formatting a research paper according to the required template is crucial for several reasons.", "指定されたテンプレートに従って論文の書式を正しく整えることは、いくつかの理由から極めて重要である。"],
+      ["First, it ensures consistency, making it easier for readers to navigate and understand the content.", "第一に、それは一貫性を保証し、読み手が内容をたどり理解しやすくなる。", ["Q1"]],
+      ["Following the template also shows professionalism and attention to detail, which makes the work more credible.", "テンプレートに従うことは、プロ意識と細部への注意も示し、研究の信頼性を高める。"],
+      ["Furthermore, journals, conferences, and academic institutions often have specific formatting requirements, and failure to follow them can lead to rejection or delays in publication.", "さらに、学術誌、学会、学術機関には特定の書式要件があることが多く、それに従わないと不採択や出版の遅れにつながりうる。", ["Q2"]],
+      ["Standardized formatting also aids in the peer review process, as it allows reviewers to quickly locate sections and assess the paper's quality.", "標準化された書式は査読の過程にも役立つ。査読者が章をすばやく見つけ、論文の質を評価できるからである。", ["Q3"]],
+      ["Overall, following the template ensures clarity, professionalism, and compliance with academic standards.", "全体として、テンプレートに従うことで、明確さ、プロ意識、学術的基準への準拠が確保される。"]
+    ]
+  ]}
+    ],
+    quizzes: [
+      { title: "2.1 Flowchart", short: "2.1 問題", ja: "フローチャートの空欄補充（Word Bank から1語）",
+        prompt: [["Read Passage 2.1 and complete the flowchart showing how an academic journal paper is published. Write one word in each blank from the Word Bank (see below).", "Passage 2.1 を読み、学術誌の論文が出版されるまでを示すフローチャートを完成させなさい。各空欄に、下の Word Bank から1語ずつ書きなさい。"],
+                 ["Word Bank: assesses / Published / screens / revises / submits / review", "assesses（評価する）/ Published（出版された）/ screens（審査する）/ revises（修正する）/ submits（投稿する）/ review（査読する）"]], items: [
+        ["Author (1) ___ the paper", "submits", "著者が論文を（投稿する）", "(1)"],
+        ["Editor (2) ___ the paper", "screens", "編集者が論文を（審査する）", "(2)"],
+        ["Reviewers (3) ___ the paper", "review", "査読者が論文を（査読する）※主語が複数なので s なし", "(3)"],
+        ["Editor (4) ___ the reviews", "assesses", "編集者が査読結果を（評価する）", "(4)"],
+        ["Author (5) ___ and resubmits the paper", "revises", "著者が（修正して）再投稿する", "(5)"],
+        ["Accepted → Further editing → (6) ___", "Published", "採択 → さらなる編集 → （出版される）", "(6)"]
+      ]},
+      { title: "2.3 Choose the correct answer", short: "2.3 問題", ja: "正しい答えを選ぶ",
+        prompt: [["Comprehension Questions: Choose the correct answer.", "読解問題：正しい答えを選びなさい。"]], items: [
+        ["Why is consistent formatting helpful to readers? → b. It makes the paper easier to navigate and understand.", "b", "なぜ一貫した書式は読み手に役立つのか？ → b. 論文をたどりやすく、理解しやすくする。", "Q1"],
+        ["What may happen if authors do not follow the required format? → a. The paper may be rejected, or its publication may be delayed.", "a", "指定の書式に従わないと何が起こりうるか？ → a. 不採択になったり、出版が遅れたりする可能性がある。", "Q2"],
+        ["How does standardized formatting help reviewers? → a. It helps them quickly find sections and assess the paper.", "a", "標準化された書式は査読者にどう役立つか？ → a. 章をすばやく見つけ、論文を評価するのに役立つ。", "Q3"]
+      ]}
+    ]
+  },
+  { id: "u3", label: "Unit 3", title: "Research Paper: Introduction and Citations",
+    passages: [
+  { id: "p31", title: "Reading Passage 3.1　Introduction Section", ja: "序論（Introduction）", paras: [
+    [
+      ["The introduction provides the foundation for an academic research paper.", "序論は、学術論文の土台となる部分である。"],
+      ["It presents the research topic, explains its significance, and guides readers toward the purpose of the study.", "研究テーマを示し、その意義を説明し、読み手を研究の目的へと導く。"],
+      ["In engineering and science, this section helps readers understand why the research is necessary, what problem is being addressed, and how the study contributes to existing knowledge or advances technology.", "工学・理学では、この章は、なぜその研究が必要なのか、どのような問題を扱うのか、そして研究が既存の知識にどう貢献し、技術をどう前進させるのかを読み手が理解する助けとなる。"]
+    ],
+    [
+      ["An introduction typically moves from general background to the specific focus of the study.", "序論は通常、一般的な背景から研究の具体的な焦点へと進む。"],
+      ["This organization is often called a “funnel” structure.", "この構成は「ファネル（漏斗）」構造と呼ばれることが多い。"],
+      ["First, the writer introduces the research area and explains its importance.", "まず、書き手は研究分野を紹介し、その重要性を説明する。"],
+      ["Next, the writer reviews relevant previous studies to establish what is already known.", "次に、すでに分かっていることを示すために、関連する先行研究を概観する。"],
+      ["The introduction then identifies a research gap, such as an unanswered question, a limitation of previous studies, or an unresolved problem.", "続いて序論は、未解決の問い、先行研究の限界、未解決の問題といった研究のギャップ（研究上の空白）を明らかにする。"],
+      ["This explains why further research is needed.", "これによって、なぜさらなる研究が必要なのかが説明される。"],
+      ["Toward the end, the writer states the purpose or aim of the study and explains its contribution to the field.", "終わりに近づくと、書き手は研究の目的やねらいを述べ、その分野への貢献を説明する。"],
+      ["Research questions, hypotheses, or a brief outline of the paper may also be included, depending on the study.", "研究によっては、研究課題、仮説、論文の簡単な概要も含まれることがある。"],
+      ["Although the exact organization varies, a clear introduction connects the background and research gap to the study’s purpose and contribution to the field.", "正確な構成は異なるものの、明確な序論は、背景と研究のギャップを、研究の目的とその分野への貢献につなげる。"]
+    ],
+    [
+      ["Examples of purpose statements:", "目的を述べる文の例："],
+      ["This study aims to investigate… e.g., “This study aims to investigate how surface texture affects friction.”", "本研究は…を調べることを目的とする。例：「本研究は、表面の質感が摩擦にどのような影響を与えるかを調べることを目的とする。」"],
+      ["The purpose of this study is to develop… e.g., “The purpose of this study is to develop a low-cost sensor for monitoring water quality.”", "本研究の目的は…を開発することである。例：「本研究の目的は、水質を監視するための低コストのセンサーを開発することである。」"]
+    ]
+  ]},
+  { id: "p31f", title: "Figure 3.1　Funnel Structure", ja: "図：ファネル構造（一般 → 具体）", paras: [
+    [
+      ["Background and Importance: Monitoring water quality is important for protecting human health.", "背景と重要性：水質を監視することは、人の健康を守るために重要である。"],
+      ["Previous Research: Previous studies have shown that …", "先行研究：先行研究は…ということを示してきた。"],
+      ["Research Gap: However, little is known about …", "研究のギャップ：しかし、…についてはほとんど分かっていない。"],
+      ["Research Aim and Contribution: The purpose of this study is to develop a low-cost sensor for monitoring water quality.", "研究の目的と貢献：本研究の目的は、水質を監視するための低コストのセンサーを開発することである。"]
+    ]
+  ]},
+  { id: "p3g", title: "IEEE Paper Introduction ¶5–7　B. Identifying the Research Gap", ja: "Lin & Smith (2017) の序論 第5〜7段落", start: 5, paras: [
+    [
+      ["The above mentioned haptic devices were not wearable.", "上で述べた触覚装置は、装着型ではなかった。", ["RG1"]],
+      ["Users needed to lay their hands on the devices to perceive surface textures.", "ユーザーは表面の質感を知覚するために、装置の上に手を置く必要があった。"],
+      ["Therefore, the use of the haptic devices might not be as natural as interacting with physical objects in the real world for acquiring tactile sensations.", "そのため、これらの触覚装置の使用は、触覚を得るために現実世界の物体に触れるほど自然ではないかもしれない。"]
+    ],
+    [
+      ["Hashimoto et al. [9] used large voice coil speakers to create pushing and pulling force.", "Hashimoto ら [9] は、大型のボイスコイルスピーカーを用いて押す力と引く力を生み出した。"],
+      ["Users wore the device on their palms to receive haptic feedback through speaker’s vibrations.", "ユーザーはこの装置を手のひらに装着し、スピーカーの振動を通じて触覚フィードバックを受けた。"],
+      ["Nishimura et al. [10] combined a voice coil actuator and two DC motors to develop a wearable haptic device which can provide vertical motion, vertical vibration, and horizontal skin stretch.", "Nishimura ら [10] は、ボイスコイルアクチュエータと2つのDCモーターを組み合わせ、垂直方向の動き、垂直方向の振動、水平方向の皮膚の伸びを与えられる装着型触覚装置を開発した。"],
+      ["Minamizawa et al. [11] used two DC motors and two belts to design a wearable device, called Gravity Grabber, to simulate the weight of a virtual object.", "Minamizawa ら [11] は、2つのDCモーターと2本のベルトを用いて、仮想物体の重さを再現する Gravity Grabber という装着型装置を設計した。"]
+    ],
+    [
+      ["Although some researchers developed wearable devices, most tactile feedbacks were not realistic.", "一部の研究者は装着型の装置を開発したが、ほとんどの触覚フィードバックはリアルではなかった。", ["RG2"]],
+      ["Romano and Kuchenbecker [12] and Culbertson et al. [13] rendered realistic haptic feedback using a voice-coil actuator mounted on a stylus.", "Romano と Kuchenbecker [12]、および Culbertson ら [13] は、スタイラス（ペン型の道具）に取り付けたボイスコイルアクチュエータを用いて、リアルな触覚フィードバックを再現した。"],
+      ["The device could detect user’s current speed and normal force and provide corresponding haptic feedback.", "この装置は、ユーザーの現在の速度と垂直方向の力を検出し、それに応じた触覚フィードバックを与えることができた。"],
+      ["Although the device could render realistic surface texture, users needed to hold a stylus to feel the surface texture indirectly.", "この装置はリアルな表面の質感を再現できたが、ユーザーはスタイラスを持って間接的に質感を感じる必要があった。"],
+      ["Therefore, the usage of the device was not as natural as normal human behavior of acquiring surface texture sensations.", "そのため、この装置の使い方は、人が普段表面の質感を感じ取る自然な行動ほど自然ではなかった。"]
+    ]
+  ]},
+  { id: "p32", title: "Reading Passage 3.2　Topic Sentence and Supporting Sentences", ja: "トピックセンテンスと支持文", paras: [
+    [
+      ["An academic paragraph usually begins with a topic sentence, which states the main idea of the paragraph.", "学術的な段落は通常、段落の主な考えを述べるトピックセンテンスで始まる。"],
+      ["Supporting sentences follow the topic sentence and develop the main idea by providing explanations, examples, data, or in-text citations.", "支持文はトピックセンテンスに続き、説明、例、データ、文中引用を示して主な考えを展開する。"],
+      ["Together, these sentences help readers understand the writer’s ideas clearly and logically.", "これらの文が合わさって、読み手が書き手の考えを明確かつ論理的に理解する助けとなる。"]
+    ]
+  ]},
+  { id: "p33", title: "Reading Passage 3.3　In-text Citations in the Introduction", ja: "序論における文中引用", paras: [
+    [
+      ["In-text citations are essential in the introduction of an academic research paper because they connect the study to existing research.", "文中引用は、研究を既存の研究と結びつけるため、学術論文の序論に不可欠である。"],
+      ["They provide evidence to support background information and key claims.", "文中引用は、背景情報や主要な主張を裏づける根拠を示す。"],
+      ["By citing relevant studies, writers can show what is already known and what remains unresolved, thereby identifying a research gap and justifying the purpose of their studies.", "関連する研究を引用することで、書き手は何がすでに分かっていて何が未解決なのかを示すことができ、それによって研究のギャップを明らかにし、自分の研究の目的を正当化できる。"]
+    ],
+    [
+      ["Example: Water quality is important for human health and the environment.", "例：水質は、人の健康と環境にとって重要である。"],
+      ["Previous studies have shown that water quality monitoring is important [1], [2].", "先行研究は、水質の監視が重要であることを示してきた [1], [2]。"],
+      ["Various sensors have been developed to monitor water quality [3].", "水質を監視するために、さまざまなセンサーが開発されてきた [3]。"],
+      ["However, many existing sensors are expensive.", "しかし、既存のセンサーの多くは高価である。"],
+      ["The purpose of this study is to develop a low-cost sensor for monitoring water quality.", "本研究の目的は、水質を監視するための低コストのセンサーを開発することである。"]
+    ],
+    [
+      ["References: [1] J. Smith, “…water quality monitoring,” Journal of XX, vol. XX, no. X, pp. XX–XX, 20XX.", "参考文献：[1] J. Smith、「…水質監視…」、Journal of XX、XX巻X号、XX–XXページ、20XX年。"],
+      ["[2] A. Lee, “…water monitoring sensors,” in Proc. XX Conference, pp. XX–XX, 20XX.", "[2] A. Lee、「…水質監視センサー…」、XX会議論文集、XX–XXページ、20XX年。"],
+      ["[3] M. Brown, “…sensor accuracy,” Technical Report XX, 20XX.", "[3] M. Brown、「…センサーの精度…」、技術報告書XX、20XX年。"]
+    ]
+  ]},
+  { id: "p3a", title: "Exercise A　Renewable Energy（正しい順）", ja: "再生可能エネルギーの序論", paras: [
+    [
+      ["Title: Improving Energy Storage and Power Grid Stability in Renewable Energy Systems", "題名：再生可能エネルギーシステムにおけるエネルギー貯蔵と電力網の安定性の向上"],
+      ["(5) The growing need for clean and sustainable energy has led to many studies on renewable energy, especially solar and wind power.", "(5) クリーンで持続可能なエネルギーへの需要の高まりにより、再生可能エネルギー、特に太陽光と風力に関する多くの研究が行われてきた。", ["A1", "A2(5)"]],
+      ["(1) These studies have led to important improvements in photovoltaic cells and wind turbine design [1], [2].", "(1) これらの研究は、太陽電池と風力タービンの設計における重要な改善をもたらした [1], [2]。", ["A1", "A2(1)", "A3"]],
+      ["(4) As a result of these improvements, renewable energy technologies have become more efficient and less expensive.", "(4) こうした改善の結果、再生可能エネルギー技術はより効率的で安価になった。", ["A1", "A2(4)"]],
+      ["(2) However, despite these benefits, problems remain in storing energy and connecting it to the power grid, limiting the wider use of renewable energy.", "(2) しかし、こうした利点にもかかわらず、エネルギーの貯蔵と電力網への接続には問題が残っており、再生可能エネルギーの普及を妨げている。", ["A1", "A2(2)"]],
+      ["(3) To address these problems, this study aims to examine new ways to improve energy storage and the stability of the power grid.", "(3) これらの問題に取り組むため、本研究はエネルギー貯蔵と電力網の安定性を改善する新しい方法を検討することを目的とする。", ["A1", "A2(3)"]]
+    ]
+  ]},
+  { id: "p3b", title: "Exercise B　Defect Detection（正しい順）", ja: "不良部品検出の序論", paras: [
+    [
+      ["Title: Machine Learning for Detecting Defective Parts with Limited Training Images", "題名：限られた学習画像で不良部品を検出する機械学習"],
+      ["(4) Defective machine parts can cause product failures, production delays, and additional costs.", "(4) 機械部品の不良は、製品の故障、生産の遅れ、追加コストを引き起こしうる。", ["B1", "B2(4)"]],
+      ["(2) To prevent such problems, trained workers have traditionally inspected parts visually, but this process requires time and its results may depend on the worker’s experience.", "(2) こうした問題を防ぐため、従来は熟練した作業者が部品を目視で検査してきたが、この作業には時間がかかり、結果は作業者の経験に左右されうる。", ["B1", "B2(2)"]],
+      ["(5) To improve this inspection process, recent studies have trained machine-learning models using images of normal and defective parts to detect defects automatically [1], [2].", "(5) この検査工程を改善するため、最近の研究では、正常な部品と不良部品の画像で機械学習モデルを訓練し、不良を自動的に検出している [1], [2]。", ["B1", "B2(5)", "B3"]],
+      ["(1) However, training these models requires a large number of images labeled as normal or defective, and images of defective parts are difficult to collect because defects are rare.", "(1) しかし、これらのモデルの訓練には、正常か不良かのラベルが付いた大量の画像が必要であり、不良は稀なため、不良部品の画像は集めにくい。", ["B1", "B2(1)"]],
+      ["(3) To address this problem, this study aims to develop a method that can accurately detect defective parts using a limited number of training images.", "(3) この問題に取り組むため、本研究は、限られた枚数の学習画像で不良部品を正確に検出できる手法を開発することを目的とする。", ["B1", "B2(3)"]]
+    ]
+  ]}
+    ],
+    quizzes: [
+      { title: "B. Identifying the Research Gap", short: "研究のギャップ", ja: "IEEE 論文の第5・7段落",
+        prompt: [["Look at the Introduction section of the IEEE paper. Which sentences in paragraphs 5 and 7 most clearly state a research gap? Underline the relevant sentences. Then briefly describe each problem in Japanese in the (　　) below.", "IEEE 論文の序論を見なさい。第5段落と第7段落で、研究のギャップを最もはっきり述べているのはどの文か。該当する文に下線を引き、それぞれの問題を下の（　　）に日本語で簡潔に書きなさい。"]], items: [
+        ["第５段落【残った問題①】：(　　) という問題の指摘 → underline: “The above mentioned haptic devices were not wearable.”", "Topic sentence", "（　）：先行研究の触覚装置は装着型ではなく、手を装置の上に置く必要があるため、現実の物体に触れるような自然な操作にならない", "RG1"],
+        ["第７段落【残った問題②】：(　　) という問題の指摘 → underline: “Although some researchers developed wearable devices, most tactile feedbacks were not realistic.”", "Topic sentence", "（　）：装着型の装置はあっても触覚フィードバックの多くはリアルではない。リアルな装置もスタイラスを握って間接的に触れるので、自然な操作ではない", "RG2"]
+      ]},
+      { title: "Exercise A　Renewable Energy", short: "A 問題", ja: "並べ替え・役割・文中引用",
+        prompt: [["Exercise: Understanding the Structure of Introduction Paragraphs", "演習：序論の段落構成を理解する"]], items: [
+        ["1. Refer to the figure in Reading Passage 3.1 and arrange sentences (1)–(5) in the correct order to form a logical introduction.", "(5)→(1)→(4)→(2)→(3)", "文(1)〜(5)を正しい順に並べなさい。背景 → 先行研究 → 研究のギャップ → 目的のファネル順になる。", "A1"],
+        ["2. Match each sentence with its role. Some roles may be used more than once. — Sentence (5)", "Background", "(5)の役割：再生可能エネルギーへの需要の高まりという一般的な背景。", "A2(5)"],
+        ["2. Match each sentence with its role. Some roles may be used more than once. — Sentence (1)", "Previous research", "(1)の役割：「These studies」で(5)を受け、先行研究の成果を示す（引用 [1], [2] あり）。", "A2(1)"],
+        ["2. Match each sentence with its role. Some roles may be used more than once. — Sentence (4)", "Previous research", "(4)の役割：先行研究の成果（技術が効率的で安価になった）の続き。", "A2(4)"],
+        ["2. Match each sentence with its role. Some roles may be used more than once. — Sentence (2)", "Research gap", "(2)の役割：However で始まり、残っている問題（貯蔵と電力網への接続）を示す。", "A2(2)"],
+        ["2. Match each sentence with its role. Some roles may be used more than once. — Sentence (3)", "Purpose of the study", "(3)の役割：this study aims to … で研究の目的を述べる。", "A2(3)"],
+        ["3. Which sentence contains in-text citations? What information do the citations support? (解答は日本語でもOK)", "(1)", "(1)に [1], [2] がある。太陽電池と風力タービンの設計が重要な改善を遂げたという先行研究の成果を裏づけている。", "A3"]
+      ]},
+      { title: "Exercise B　Defect Detection", short: "B 問題", ja: "並べ替え・役割・文中引用",
+        prompt: [["Exercise: Understanding the Structure of Introduction Paragraphs", "演習：序論の段落構成を理解する"]], items: [
+        ["1. Refer to the figure in Reading Passage 3.1 and arrange sentences (1)–(5) in the correct order to form a logical introduction.", "(4)→(2)→(5)→(1)→(3)", "文(1)〜(5)を正しい順に並べなさい。不良部品の影響（背景）→ 従来の目視検査 → 機械学習による最近の研究 → 学習画像が集めにくいという問題 → 目的。", "B1"],
+        ["2. Match each sentence with its role. Some roles may be used more than once. — Sentence (4)", "Background", "(4)の役割：不良部品が引き起こす問題という一般的な背景。", "B2(4)"],
+        ["2. Match each sentence with its role. Some roles may be used more than once. — Sentence (2)", "Background", "(2)の役割：従来の目視検査という現場の一般的なやり方の説明（引用なし）なので背景。時間と経験への依存という限界にも触れ、(5) の機械学習研究につながる。", "B2(2)"],
+        ["2. Match each sentence with its role. Some roles may be used more than once. — Sentence (5)", "Previous research", "(5)の役割：機械学習による自動検出という最近の研究（引用 [1], [2] あり）。", "B2(5)"],
+        ["2. Match each sentence with its role. Some roles may be used more than once. — Sentence (1)", "Research gap", "(1)の役割：However で始まり、大量のラベル付き画像が必要で不良画像は集めにくいという問題を示す。", "B2(1)"],
+        ["2. Match each sentence with its role. Some roles may be used more than once. — Sentence (3)", "Purpose of the study", "(3)の役割：this study aims to develop … で研究の目的を述べる。", "B2(3)"],
+        ["3. Which sentence contains in-text citations? What information do the citations support? (解答は日本語でもOK)", "(5)", "(5)に [1], [2] がある。正常・不良の画像で機械学習モデルを訓練し、不良を自動検出する最近の研究を裏づけている。", "B3"]
+      ]},
+      { title: "Grammar Focus", short: "文法", ja: "誤りと訂正（Self-study）",
+        prompt: [["English Grammar Focus (Self-study): Read the following examples and note the underlined errors and their corrections.", "英文法（自習）：次の例を読み、下線部の誤りとその訂正を確認しなさい。"]], items: [
+        ["A-1 ×Previous studies shows that this method is effective.", "show", "主語 studies は複数なので動詞は show（主語と動詞の一致）。", "G-A1"],
+        ["A-2 ×There has been many challenges in this field.", "have", "主語 challenges は複数なので there have been（主語と動詞の一致）。", "G-A2"],
+        ["B-1 ×Many researches have not been conducted on this topic.", "Not much research has", "research は不可算名詞。not much research とし動詞は has。または Not many studies have been conducted… でもよい。", "G-B1"],
+        ["B-2 ×Several method are proposed in previous studies.", "Several methods", "method は可算名詞。several の後では複数形にする。", "G-B2"],
+        ["C-1 ×This paper proposes method to improve accuracy.", "a method", "method は可算名詞で単数なので冠詞が必要。", "G-C1"],
+        ["C-2 ×The smartphone has become a essential tool in daily life.", "an", "essential は母音で始まるので a ではなく an。", "G-C2"]
+      ]}
+    ]
+  }
+];
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+const host = document.getElementById("passages"), qhost = document.getElementById("quizzes");
+let pinned = null, qSentences = {};
+const all = k => host.querySelectorAll('.s[data-k="' + k + '"]');
+function show(keys) {
+  host.querySelectorAll(".s.on").forEach(e => e.classList.remove("on"));
+  keys.forEach(k => all(k).forEach(e => e.classList.add("on")));
+}
+function rest() { show(pinned || []); }
+function setPin(keys) {
+  host.querySelectorAll(".s.pinned").forEach(e => e.classList.remove("pinned"));
+  pinned = keys;
+  if (keys) keys.forEach(k => all(k).forEach(e => e.classList.add("pinned")));
+  rest();
+}
+
+function render(u) {
+  pinned = null; qSentences = {};
+  host.replaceChildren(); qhost.replaceChildren();
+  document.getElementById("eyebrow").textContent = "Academic English · " + u.label;
+  document.getElementById("utitle").textContent = u.title;
+  document.querySelectorAll("#units button").forEach(b => b.setAttribute("aria-pressed", b.dataset.u === u.id));
+  // Each quiz item may carry its own id (4th field, e.g. "(1)"); otherwise "Q" + running number.
+  // Passage sentences point at items by that id, or by running number.
+  const byId = {}, numToId = {};
+  let c = 0;
+  u.quizzes.forEach(q => q.items.forEach(it => { const id = it[3] || "Q" + (c + 1); numToId[++c] = id; byId[id] = it; }));
+  const refId = r => typeof r === "number" ? numToId[r] : r;
+  const badge = r => {
+    const id = refId(r), it = byId[id], ok = it && it[1] === true, ng = it && it[1] === false;
+    const b = el("span", "q" + (ok ? " t" : ng ? " f" : ""), id);
+    b.title = id + (it ? "：" + (ok ? "True" : ng ? "False" : it[1]) : "");
+    return b;
+  };
+  const jump = document.getElementById("jump"); jump.replaceChildren();
+  u.passages.forEach((p, i) => {
+    const pid = u.id + "-p" + i;
+    const a = el("a", null, p.title.split("　")[0].replace("Reading ", "")); a.href = "#" + pid; jump.append(a);
+    const sec = el("section", "passage"); sec.id = pid;
+    const h = el("div", "p-head"); h.append(el("h2", null, p.title), el("span", "ja-title", p.ja)); sec.append(h);
+    const ch = el("div", "colhead"); ch.append(el("div", null, "English"), el("div", null, "日本語訳")); sec.append(ch);
+    p.paras.forEach((para, pi) => {
+      const row = el("div", "row"), en = el("p", "en"), ja = el("p", "ja");
+      const pno = "¶" + (pi + (p.start || 1)); en.append(el("span", "pn", pno)); ja.append(el("span", "pn", pno));
+      para.forEach((s, si) => {
+        const key = pid + "-" + pi + "-" + si;
+        [[en, s[0]], [ja, s[1]]].forEach(([target, txt], side) => {
+          const sp = el("span", "s", txt);
+          sp.dataset.k = key; sp.tabIndex = 0; sp.setAttribute("role", "button");
+          sp.setAttribute("aria-label", (side ? "和訳: " : "English: ") + txt);
+          target.append(sp);
+          if (side === 0 && s[2]) s[2].forEach(r => { target.append(badge(r)); (qSentences[refId(r)] ||= []).push(key); });
+          if (!side) target.append(document.createTextNode(" "));
+        });
+      });
+      row.append(en, ja); sec.append(row);
+    });
+    host.append(sec);
+  });
+  let n = 0;
+  u.quizzes.forEach((q, qi) => {
+    const sec = el("section", "quiz"); sec.id = u.id + "-q" + qi;
+    const h = el("h2", null, q.title + "　"); h.append(el("span", "ja-title", q.ja + "（押すと根拠の文へ移動）")); sec.append(h);
+    const a = el("a", null, q.short || q.title.split(".")[0] + ". 問題"); a.href = "#" + sec.id; jump.append(a);
+    (q.prompt || []).forEach(([pen, pja]) => {
+      const pr = el("div", "qprompt"); pr.append(el("span", "en", pen));
+      if (pja) pr.append(el("span", "ja", pja));
+      sec.append(pr);
+    });
+    const ol = el("ol");
+    q.items.forEach(([txt, ans, jt, ownId]) => {
+      const num = ++n, id = ownId || "Q" + num, li = el("li"), b = el("button");
+      b.type = "button";
+      const cls = ans === true ? "t" : ans === false ? "f" : "";
+      const body = el("span", "txt"); body.append(el("span", null, txt), el("span", "qja", jt));
+      b.append(el("span", "num", id), el("span", "ans " + cls, ans === true ? "True" : ans === false ? "False" : ans), body);
+      b.addEventListener("click", () => {
+        const keys = qSentences[id] || []; setPin(keys);
+        const first = keys.length && all(keys[0])[0];
+        if (first) first.scrollIntoView({ block: "center" });
+      });
+      li.append(b); ol.append(li);
+    });
+    sec.append(ol); qhost.append(sec);
+  });
+  const sa = el("a", null, "テストを解く"); sa.href = "#solver"; jump.append(sa);
+  curUnit = u; solverUnitChanged();
+  try { localStorage.setItem("unit2", JSON.stringify({ id: u.id, n: UNITS.length })); } catch (e) {}
+}
+
+// ---- Test solver: asks Claude with the current unit's sentences, shows answers with clickable evidence
+let curUnit = null, svCtl = null, svImages = [], svBlocked = false;
+const $ = id => document.getElementById(id);
+const svKey = () => "solver-" + (curUnit ? curUnit.id : "");
+
+function unitSentences(u) {
+  const list = [];
+  u.passages.forEach((p, i) => p.paras.forEach((para, pi) => para.forEach((s, si) => {
+    list.push({ key: u.id + "-p" + i + "-" + pi + "-" + si, where: p.title.split("　")[0].replace("Reading ", "") + " ¶" + (pi + (p.start || 1)), en: s[0], ja: s[1] });
+  })));
+  return list;
+}
+
+function renderAnswers(data) {
+  const out = $("sv-out"); out.replaceChildren();
+  if (!data || !Array.isArray(data.items)) return;
+  const byKey = Object.fromEntries(unitSentences(curUnit).map(s => [s.key, s]));
+  data.items.forEach(it => {
+    const card = el("div", "sv-card");
+    card.append(el("div", "sv-q", (it.no ? it.no + ". " : "") + (it.question || "")));
+    if (it.question_ja) card.append(el("div", "sv-qja", "（訳）" + it.question_ja));
+    const ans = el("div", "sv-ans"); ans.append("答え：", el("b", null, String(it.answer ?? "")));
+    if (it.answer_ja) ans.append(" ", el("span", "ja", "（" + it.answer_ja + "）"));
+    card.append(ans);
+    if (it.reason_ja) card.append(el("div", "sv-why", it.reason_ja));
+    const keys = (Array.isArray(it.evidence) ? it.evidence : []).map(String).filter(k => byKey[k]);
+    if (keys.length) {
+      const ev = el("div", "sv-ev");
+      keys.forEach(k => {
+        const s = byKey[k], b = el("button");
+        b.type = "button";
+        b.append(el("small", null, "根拠：" + s.where + "（押すと本文へ）"), document.createTextNode(s.en));
+        b.addEventListener("click", () => { setPin(keys); const t = all(k)[0]; if (t) t.scrollIntoView({ block: "center" }); });
+        ev.append(b);
+      });
+      card.append(ev);
+    } else {
+      card.append(el("div", "sv-none", "本文中に直接の根拠が見つかりませんでした（一般知識からの回答）。"));
+    }
+    out.append(card);
+  });
+}
+
+function solverUnitChanged() {
+  $("sv-scope").textContent = curUnit.label + " の本文を根拠に回答";
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(svKey()) || "null"); } catch (e) {}
+  $("sv-text").value = saved ? saved.q : "";
+  $("sv-status").textContent = "";
+  renderAnswers(saved && saved.a);
+}
+
+function showFiles() { $("sv-files").textContent = svImages.length ? svImages.map(f => f.name || "画像").join("、") : ""; }
+
+const svMsg = {
+  not_granted: "Claude の利用が許可されていません。", sampling_disabled: "このアカウントでは Claude を使えません。",
+  rate_limited: "利用が混み合っています。少し待ってからもう一度押してください。", session_expired: "サインインし直してください。",
+  invalid_json: "答えの形式が崩れました。もう一度「解く」を押してください。", refused: "この内容には回答できませんでした。問題文を見直してください。",
+  prompt_too_large: "入力が長すぎます。問題を分けて貼り付けてください。", image_rejected: "この画像は使えません。別の画像を選んでください。",
+  images_unavailable: "この環境では画像を送れません。問題文を貼り付けてください。"
+};
+
+(async () => {
+  const sample = window.claude ? await window.claude.use("sample") : null;
+  if (!sample) {
+    $("sv-go").disabled = true;
+    $("sv-status").textContent = "このページを claude.ai で開くと使えます。";
+    return;
+  }
+  sample.limits().then(l => { if (l && l.images) { $("sv-file-wrap").hidden = false; $("sv-file").accept = l.images.mediaTypes.join(","); } }).catch(() => {});
+  $("sv-file").addEventListener("change", e => { svImages = Array.from(e.target.files || []); showFiles(); });
+  $("sv-text").addEventListener("paste", e => {
+    const imgs = Array.from(e.clipboardData?.files || []).filter(f => f.type.startsWith("image/"));
+    if (imgs.length && !$("sv-file-wrap").hidden) { svImages = svImages.concat(imgs); showFiles(); }
+  });
+  $("sv-clear").addEventListener("click", () => {
+    $("sv-text").value = ""; svImages = []; $("sv-file").value = ""; showFiles();
+    $("sv-out").replaceChildren(); $("sv-status").textContent = "";
+    try { localStorage.removeItem(svKey()); } catch (e) {}
+  });
+  $("sv-stop").addEventListener("click", () => svCtl && svCtl.abort());
+  $("sv-go").addEventListener("click", async () => {
+    const q = $("sv-text").value.trim();
+    if (!q && !svImages.length) { $("sv-status").textContent = "問題文を貼り付けるか、画像を追加してください。"; return; }
+    const u = curUnit, sents = unitSentences(u);
+    const prompt = [
+      "You are helping a Japanese university student review an Academic English class (" + u.label + ": " + u.title + ").",
+      "Answer the test questions below using the reading passage. For each question, find the sentence(s) in the passage that support the answer.",
+      "", "PASSAGE SENTENCES (format: [key] (location) sentence):",
+      sents.map(s => "[" + s.key + "] (" + s.where + ") " + s.en).join("\n"),
+      "", "TEST QUESTIONS" + (svImages.length ? " (also shown in the attached image(s))" : "") + ":", q || "(see image)",
+      "", "Reply with only JSON in this shape:",
+      '{"items":[{"no":"1","question":"original question text (short)","question_ja":"Japanese translation of the question","answer":"the answer exactly as it should be written (e.g. True / (b) / a word for a blank / a short English answer)","answer_ja":"Japanese meaning of the answer (or empty)","reason_ja":"1-2 sentences in Japanese explaining why, referring to the evidence","evidence":["key", "..."]}]}',
+      "Rules: use keys exactly as given; evidence may be [] only if the passage has no support. One item per question, in order. Keep reason_ja short."
+    ].join("\n");
+    svCtl = new AbortController();
+    $("sv-go").disabled = true; $("sv-stop").hidden = false;
+    $("sv-status").textContent = "考え中…（本文から根拠を探しています。30秒ほどかかることがあります）";
+    try {
+      const opts = { signal: svCtl.signal, cache: false };
+      if (svImages.length) opts.images = svImages;
+      const data = await sample.json(prompt, opts);
+      if (curUnit !== u) return;
+      renderAnswers(data);
+      const n = data && Array.isArray(data.items) ? data.items.length : 0;
+      $("sv-status").textContent = n ? n + " 問の答えを出しました。根拠を押すと本文で確認できます。" : "答えを読み取れませんでした。問題文を見直してください。";
+      try { localStorage.setItem(svKey(), JSON.stringify({ q, a: data })); } catch (e) {}
+    } catch (e) {
+      $("sv-status").textContent = e && e.code === "cancelled" ? "停止しました。" : (svMsg[e && e.code] || "うまくいきませんでした。もう一度「解く」を押してください。");
+      if (e && (e.code === "not_granted" || e.code === "sampling_disabled")) svBlocked = true;
+    } finally {
+      $("sv-go").disabled = svBlocked;
+      $("sv-stop").hidden = true; svCtl = null;
+    }
+  });
+})();
+
+const unitsNav = document.getElementById("units");
+UNITS.forEach(u => { const b = el("button", null, u.label); b.type = "button"; b.dataset.u = u.id; b.addEventListener("click", () => render(u)); unitsNav.append(b); });
+let start = UNITS[UNITS.length - 1];
+try { const saved = JSON.parse(localStorage.getItem("unit2") || "null"); if (saved && saved.n === UNITS.length) start = UNITS.find(u => u.id === saved.id) || start; } catch (e) {}
+render(start);
+
+host.addEventListener("mouseover", e => { const s = e.target.closest(".s"); if (s) show([s.dataset.k]); });
+host.addEventListener("mouseout", e => { const s = e.target.closest(".s"); if (s && !s.contains(e.relatedTarget)) rest(); });
+host.addEventListener("focusin", e => { const s = e.target.closest(".s"); if (s) show([s.dataset.k]); });
+host.addEventListener("focusout", rest);
+function toggle(s) { const k = s.dataset.k; setPin(pinned && pinned.length === 1 && pinned[0] === k ? null : [k]); }
+host.addEventListener("click", e => { const s = e.target.closest(".s"); if (s) toggle(s); });
+host.addEventListener("keydown", e => { const s = e.target.closest(".s"); if (s && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggle(s); } });
+</script>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>自然言語処理 第2回課題レポート</title>
+<style>
+  @page { size: A4; margin: 18mm 18mm 18mm 18mm; }
+  body { font-family: "Yu Mincho", "YuMincho", "BIZ UDMincho", serif; font-size: 10.5pt; line-height: 1.75; color: #111; background: #fff; }
+  h1 { font-family: "Yu Gothic", "Meiryo", sans-serif; font-size: 16pt; text-align: center; margin: 0 0 4px; }
+  .meta { text-align: center; font-size: 10pt; margin-bottom: 18px; }
+  h2 { font-family: "Yu Gothic", "Meiryo", sans-serif; font-size: 13pt; border-bottom: 1.5px solid #333; padding-bottom: 2px; margin: 22px 0 8px; }
+  h3 { font-family: "Yu Gothic", "Meiryo", sans-serif; font-size: 11pt; margin: 14px 0 4px; }
+  h4 { font-family: "Yu Gothic", "Meiryo", sans-serif; font-size: 10.5pt; margin: 10px 0 2px; }
+  p { margin: 4px 0; text-indent: 1em; }
+  p.noindent { text-indent: 0; }
+  ul, ol { margin: 4px 0 4px 1.2em; padding-left: 1em; }
+  li { margin: 1px 0; }
+  table { border-collapse: collapse; margin: 8px auto; font-size: 9.5pt; }
+  th, td { border: 1px solid #888; padding: 2px 8px; }
+  table.err th, table.err td { padding: 1px 4px; white-space: nowrap; }
+  th { background: #eee; font-family: "Yu Gothic", "Meiryo", sans-serif; font-weight: 600; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  td.c { text-align: center; }
+  td:first-child, th:first-child { white-space: nowrap; }
+  td.hl { font-weight: bold; background: #e6f0fb; }
+  td.ng { background: #fde8df; }
+  .cap { text-align: center; font-size: 9.5pt; margin: 2px 0 10px; font-family: "Yu Gothic", "Meiryo", sans-serif; }
+  figure { margin: 8px 0 2px; text-align: center; page-break-inside: avoid; }
+  figure img { max-width: 100%; }
+  .tblock { page-break-inside: avoid; }
+  .pb { page-break-before: always; }
+  .note { font-size: 9pt; color: #444; }
+  .cms { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+  .cm { text-align: center; font-size: 8.8pt; font-family: "Yu Gothic", "Meiryo", sans-serif; }
+  .cm table { margin: 2px auto; font-size: 8.8pt; }
+  .cm th, .cm td { padding: 1px 6px; }
+  pre { font-family: Consolas, "BIZ UDGothic", monospace; font-size: 8.6pt; line-height: 1.45; background: #f6f6f4; border: 1px solid #ddd; padding: 6px 10px; white-space: pre-wrap; page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<h1>自然言語処理 第2回課題<br>人名分類の実験</h1>
+<div class="meta">学籍番号 AL24007　氏名 卜部 颯斗　／　提出日 2026年10月27日</div>
+
+<!-- ============================ 課題1 ============================ -->
+<h2>課題1：人名分類の実行</h2>
+
+<h3>1) 調査方法</h3>
+<p>配布データ person_data.txt（20人分。政治家10人・非政治家10人）を Python で読み込み、7つの特徴（「城」「大名」「茶」「明治」「大臣」「戦争」「作品」の出現回数）からなる7次元の特徴ベクトルと正解ラベル（1：政治家，2：非政治家）のリストを作成した。分類には scikit-learn 1.9.1 を用いた。</p>
+<p>評価は10分割交差確認で行った。scikit-learn の StratifiedKFold（シャッフルなし）で20人を10個のfoldに分け、各foldには政治家1人と非政治家1人の計2人がテストデータとして入るようにした。残りの18人で学習し、テストの2人を分類する処理を10回繰り返した（cross_val_predict を使用）。全foldの予測結果を正解ラベルと比べて混同行列を作り、10回分の正解率の平均を平均正解率とした。全ての方法で同じfold分割を使ったので、方法どうしを公平に比較できる。</p>
+<p>「複数の方法」として、分類モデルとハイパーパラメータを変えた次の10通りを試した。</p>
+<ul>
+  <li><b>Naive Bayes</b>：BernoulliNB（特徴を「出現する/しない」の2値として扱う。講義で説明されたベルヌーイ分布のモデル）と MultinomialNB（出現回数をそのまま扱う）。どちらも加算スムージング α=1。</li>
+  <li><b>線形SVM</b>：SVC(kernel='linear')。コスト C を 0.01, 0.1, 1, 10 の4通りに変えた。</li>
+  <li><b>RBFカーネルSVM</b>：SVC(kernel='rbf', gamma='scale')。C=1, 10 の2通り。</li>
+  <li><b>2値化した特徴の線形SVM</b>：出現回数を 1（出現）/0（非出現）に変換してから線形SVMを学習した（C=0.1, 1）。BernoulliNB と同じ情報だけを SVM に与えた場合を比べるために追加した。</li>
+</ul>
+<p class="noindent">使用したプログラムの主要部分を以下に示す。</p>
+<pre>cv = StratifiedKFold(n_splits=10)            # 各foldに政治家1人・非政治家1人
+models = {"BernoulliNB": BernoulliNB(), "MultinomialNB": MultinomialNB(),
+          "SVM linear C=0.01": SVC(kernel="linear", C=0.01), ...,
+          "SVM linear 2値化 C=0.1": make_pipeline(Binarizer(), SVC(kernel="linear", C=0.1)), ...}
+for key, model in models.items():
+    pred = cross_val_predict(model, X, y, cv=cv)
+    cm = confusion_matrix(y, pred, labels=[1, 2]).T      # 行＝推測，列＝正解
+    acc = np.mean([accuracy_score(y[t], pred[t]) for t in folds])</pre>
+
+<h3>2) 調査結果</h3>
+<p>各方法の平均正解率を図1に、混同行列を表1に示す。混同行列は講義スライドと同じく、行を分類器の推測、列を正解ラベルとした。</p>
+
+<figure><img src="fig1_accuracy.png" alt="各方法の平均正解率" style="width:82%"></figure>
+<div class="cap">図1　各方法の平均正解率（青が最高値）</div>
+
+<div class="tblock">
+<div class="cms">
+  <div class="cm">BernoulliNB（0.90）<table><tr><th>推測＼正解</th><th>政治家</th><th>非政治家</th></tr><tr><th>政治家</th><td class="n hl">10</td><td class="n">2</td></tr><tr><th>非政治家</th><td class="n">0</td><td class="n hl">8</td></tr></table></div>
+  <div class="cm">MultinomialNB（0.75）<table><tr><th>推測＼正解</th><th>政治家</th><th>非政治家</th></tr><tr><th>政治家</th><td class="n hl">8</td><td class="n">3</td></tr><tr><th>非政治家</th><td class="n">2</td><td class="n hl">7</td></tr></table></div>
+  <div class="cm">線形SVM C=0.01（0.90）<table><tr><th>推測＼正解</th><th>政治家</th><th>非政治家</th></tr><tr><th>政治家</th><td class="n hl">10</td><td class="n">2</td></tr><tr><th>非政治家</th><td class="n">0</td><td class="n hl">8</td></tr></table></div>
+  <div class="cm">線形SVM C=0.1（0.80）<table><tr><th>推測＼正解</th><th>政治家</th><th>非政治家</th></tr><tr><th>政治家</th><td class="n hl">8</td><td class="n">2</td></tr><tr><th>非政治家</th><td class="n">2</td><td class="n hl">8</td></tr></table></div>
+  <div class="cm">線形SVM C=1（0.80）<table><tr><th>推測＼正解</th><th>政治家</th><th>非政治家</th></tr><tr><th>政治家</th><td class="n hl">9</td><td class="n">3</td></tr><tr><th>非政治家</th><td class="n">1</td><td class="n hl">7</td></tr></table></div>
+  <div class="cm">線形SVM C=10（0.80）<table><tr><th>推測＼正解</th><th>政治家</th><th>非政治家</th></tr><tr><th>政治家</th><td class="n hl">9</td><td class="n">3</td></tr><tr><th>非政治家</th><td class="n">1</td><td class="n hl">7</td></tr></table></div>
+  <div class="cm">RBF SVM C=1（0.80）<table><tr><th>推測＼正解</th><th>政治家</th><th>非政治家</th></tr><tr><th>政治家</th><td class="n hl">9</td><td class="n">3</td></tr><tr><th>非政治家</th><td class="n">1</td><td class="n hl">7</td></tr></table></div>
+  <div class="cm">RBF SVM C=10（0.70）<table><tr><th>推測＼正解</th><th>政治家</th><th>非政治家</th></tr><tr><th>政治家</th><td class="n hl">7</td><td class="n">3</td></tr><tr><th>非政治家</th><td class="n">3</td><td class="n hl">7</td></tr></table></div>
+  <div class="cm">2値化 線形SVM C=0.1（0.95）<table><tr><th>推測＼正解</th><th>政治家</th><th>非政治家</th></tr><tr><th>政治家</th><td class="n hl">10</td><td class="n">1</td></tr><tr><th>非政治家</th><td class="n">0</td><td class="n hl">9</td></tr></table></div>
+  <div class="cm">2値化 線形SVM C=1（0.90）<table><tr><th>推測＼正解</th><th>政治家</th><th>非政治家</th></tr><tr><th>政治家</th><td class="n hl">10</td><td class="n">2</td></tr><tr><th>非政治家</th><td class="n">0</td><td class="n hl">8</td></tr></table></div>
+</div>
+<div class="cap">表1　各方法の混同行列（括弧内は平均正解率。網掛けが正しい推測）</div>
+</div>
+
+<p>最も正解率が高かったのは 2値化した特徴の線形SVM（C=0.1）の 0.95 で、次いで BernoulliNB、線形SVM（C=0.01）、2値化線形SVM（C=1）の 0.90 だった。出現回数をそのまま使う方法（MultinomialNB、通常のSVM）は 0.70〜0.80 にとどまった。</p>
+
+<h3>3) 考察</h3>
+<p><b>出現の有無だけを使う方が精度が高かった。</b>同じ線形SVMでも、出現回数をそのまま入力すると 0.80 だったのに対し、2値化すると 0.90〜0.95 に上がった。Naive Bayes でも、2値の BernoulliNB（0.90）の方が回数を使う MultinomialNB（0.75）より良かった。このデータでは出現回数のばらつきが大きく（上杉謙信の「城」25回、伊藤博文の「明治」15回など）、回数をそのまま使うと、ある人物の1つの特徴だけが大きな値になって判定を左右してしまう。人物を説明するWebページでは「その語が出てくるか」が職業をよく表し、「何回出てくるか」はページの長さや書き方に影響されやすいと考えられる。</p>
+<p><b>ハイパーパラメータの影響。</b>線形SVMでは C=0.1〜10 では正解率が 0.80 で変わらなかったが、C=0.01 まで小さくすると 0.90 に上がった。C が小さいと例外データへのペナルティが弱くなり、マージンを広く取る単純な境界になる。学習データが18人しかないので、個々のデータに合わせすぎない方が未知データに強くなったと考えられる。RBFカーネルでは C=10 が最低の 0.70 だった。RBFは非線形の複雑な境界を作れるが、データが少ないとかえって過学習しやすく、今回の問題には向いていなかった。</p>
+<p><b>誤りの向きの偏り。</b>BernoulliNB と 2値化SVM の誤りは、すべて「非政治家を政治家と判定する」向きだった（表1の右上）。これは、非政治家らしさを示す特徴が実質的に「作品」1つしかないことと関係していると考えられる（課題3で詳しく述べる）。</p>
+<p class="noindent"><span class="note">※ データが20人しかないため、1人の誤りで正解率が 0.05 変わる。0.90 と 0.95 の差は1人分であり、方法の優劣を断定するにはより多くのデータでの検証が必要である。</span></p>
+
+<!-- ============================ 課題2 ============================ -->
+<h2>課題2：エラー分析</h2>
+
+<h3>1) 調査方法</h3>
+<p>課題1の10通りの実験すべてについて、交差確認で誤分類された人物を調べ、人物×方法の表にまとめた。特に、講義で扱った BernoulliNB と線形SVM（C=1）については、誤分類が起きたfoldの18人で学習し直したモデルを使い、その人物に対する事後確率（BernoulliNB）と判別関数 f(x) の値（SVM）を求めて、どの程度「惜しい」誤りだったかを確認した。そのうえで、誤分類された人物の特徴ベクトルと実際の経歴を照らし合わせ、共通点と原因を考えた。</p>
+
+<h3>2) 調査結果</h3>
+<p>1つ以上の方法で誤分類された人物を表2に示す。8人が該当し、残りの12人はどの方法でも正しく分類された。</p>
+
+<div class="tblock">
+<table class="err">
+  <tr><th>人物（正解）</th><th>特徴ベクトル（0は省略）</th><th>BNB</th><th>MNB</th><th colspan="1">線形<br>.01</th><th>線形<br>.1</th><th>線形<br>1</th><th>線形<br>10</th><th>RBF<br>1</th><th>RBF<br>10</th><th>2値<br>.1</th><th>2値<br>1</th><th>計</th></tr>
+  <tr><td>狩野永徳（非）</td><td>城4, 明治1</td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c"></td><td class="c ng">×</td><td class="n">9</td></tr>
+  <tr><td>岡倉天心（非）</td><td>大名1, 茶5, 明治5</td><td class="c ng">×</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="n">7</td></tr>
+  <tr><td>大久保利通（政）</td><td>茶1, 明治6, 大臣2, 戦争2</td><td class="c"></td><td class="c ng">×</td><td class="c"></td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c"></td><td class="c"></td><td class="n">6</td></tr>
+  <tr><td>与謝野晶子（非）</td><td>明治3, 大臣2, 戦争7, 作品4</td><td class="c"></td><td class="c ng">×</td><td class="c"></td><td class="c ng">×</td><td class="c ng">×</td><td class="c ng">×</td><td class="c"></td><td class="c ng">×</td><td class="c"></td><td class="c"></td><td class="n">5</td></tr>
+  <tr><td>千利休（非）</td><td>城1, 大名3, 茶18, 作品1</td><td class="c"></td><td class="c ng">×</td><td class="c ng">×</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c ng">×</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="n">3</td></tr>
+  <tr><td>伊藤博文（政）</td><td>明治15, 大臣3, 戦争9</td><td class="c"></td><td class="c ng">×</td><td class="c"></td><td class="c ng">×</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="n">2</td></tr>
+  <tr><td>上杉謙信（政）</td><td>城25, 大名3, 明治1</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c ng">×</td><td class="c"></td><td class="c"></td><td class="n">1</td></tr>
+  <tr><td>徳川吉宗（政）</td><td>城2, 大名2, 大臣3</td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c"></td><td class="c ng">×</td><td class="c"></td><td class="c"></td><td class="n">1</td></tr>
+</table>
+<div class="cap">表2　誤分類された人物と方法（×＝誤分類。BNB/MNB＝Naive Bayes，線形・RBF・2値（2値化線形SVM）の下の数字は C の値）</div>
+</div>
+
+<div class="tblock">
+<table>
+  <tr><th>方法</th><th>誤分類された人物</th><th>テストfold</th><th>モデルの出力</th></tr>
+  <tr><td rowspan="2">BernoulliNB</td><td>狩野永徳</td><td class="n">2</td><td>P(政治家|x)=0.54，P(非政治家|x)=0.46</td></tr>
+  <tr><td>岡倉天心</td><td class="n">6</td><td>P(政治家|x)=0.73，P(非政治家|x)=0.27</td></tr>
+  <tr><td rowspan="4">線形SVM C=1</td><td>狩野永徳</td><td class="n">2</td><td>f(x)=−0.70（負＝政治家と判定）</td></tr>
+  <tr><td>岡倉天心</td><td class="n">6</td><td>f(x)=−0.10（政治家と判定）</td></tr>
+  <tr><td>大久保利通</td><td class="n">8</td><td>f(x)=+0.63（正＝非政治家と判定）</td></tr>
+  <tr><td>与謝野晶子</td><td class="n">10</td><td>f(x)=−3.43（政治家と判定）</td></tr>
+</table>
+<div class="cap">表3　誤分類時のモデルの出力（そのfoldの18人で学習したモデル）</div>
+</div>
+
+<h3>3) 考察</h3>
+<h4>(a) 権力者のそばで活動した文化人が政治家と誤分類される</h4>
+<p>最も誤りが多かった狩野永徳（9/10の方法で誤り）、岡倉天心（7/10）、千利休（3/10）は、いずれも非政治家だが政治家と判定された。3人に共通するのは、<b>権力者と深く関わった文化人</b>だという点である。狩野永徳は織田信長・豊臣秀吉に仕えて安土城や大坂城の障壁画を描いた絵師であり、千利休は信長・秀吉に仕えた茶人、岡倉天心は文部省の官僚でもあった美術思想家で『茶の本』の著者である。そのため、彼らについてのページには「城」「大名」「茶」といった、戦国時代〜江戸時代の政治家と共通する語が現れる。今回の7特徴では「どの時代・どの場面の人か」は分かっても、「その場面でどんな役割を果たしたか」までは区別できない。</p>
+<p>さらに、狩野永徳と岡倉天心のベクトルには「作品」が含まれていない（表2）。非政治家らしさを表す特徴は実質「作品」だけなので、これがないと政治家寄りの特徴（「城」「大名」）に引っ張られてしまう。絵画や美術の人物なのに「作品」が0回というのは意外だが、Webページでは「障壁画」「屏風」「著書」のように別の語で書かれていたためと考えられる。BernoulliNB の狩野永徳に対する事後確率は 0.54 対 0.46 でほぼ五分五分であり（表3）、情報が足りないまま判定せざるを得なかったことが分かる。</p>
+
+<h4>(b) 出現回数の大きな特徴に判定が引っ張られる</h4>
+<p>与謝野晶子は「作品」を4回含むにもかかわらず、出現回数を使う線形SVMでは強く政治家側に判定された（f(x)=−3.43）。これは「戦争」が7回と多いためである。与謝野晶子は日露戦争の際に反戦詩「君死にたまふことなかれ」を発表しており、ページ中で戦争に言及される。線形SVMは「重み×出現回数」を足し合わせるので、1つの特徴の回数が大きいとその影響が支配的になる。一方、出現の有無だけを使う BernoulliNB と 2値化SVM では、「作品が出現する」という強い手がかりが効いて正しく分類できた。課題1で 2値化が有効だった理由が、この例から具体的に確認できる。</p>
+
+<h4>(c) 明治以降の政治家が少なく、非政治家と区別しにくい</h4>
+<p>大久保利通と伊藤博文は政治家だが、出現回数を使う方法で非政治家と誤分類された。政治家10人のうち7人は戦国〜江戸時代の人物で「城」「大名」が主な手がかりになっているが、明治以降の政治家は大久保利通・伊藤博文・吉田茂の3人しかいない。1人をテストに回すと、学習データ中の明治以降の政治家は2人だけになる。一方「明治」は夏目漱石・樋口一葉など明治の非政治家にも多く現れるため、「明治」の回数が多くて「城」「大名」がない人物は非政治家側に判定されやすい。大久保利通の「大臣」は2回と少なく、回数ベースでは政治家側への寄与が小さかった。2値化すると「大臣が出現する」こと自体が強い手がかりとなり、正しく分類できた。<b>政治家クラスが「戦国・江戸型」と「明治以降型」の2つのまとまりからなる</b>ことも、1本の直線（超平面）で分ける線形SVMを難しくしていると考えられる。</p>
+
+<h4>(d) 改善案</h4>
+<p>以上から、誤りの主な原因は (1) 非政治家を表す特徴の不足、(2) 出現回数のスケールの不揃い、(3) 時代ごとの学習データの偏り、の3つだと考えられる。改善策として、「絵」「茶道」「俳句」「小説」「研究」など非政治家の職業を表す語を特徴に加えること、回数を2値化や対数変換・ページ長での正規化によって揃えること、明治以降の政治家のデータを増やすことが挙げられる。</p>
+
+<!-- ============================ 課題3 ============================ -->
+<h2>課題3：特徴分析</h2>
+
+<h3>1) 調査方法</h3>
+<p>各特徴について、政治家10人・非政治家10人それぞれで (i) その語が出現する人数と (ii) 出現回数の合計を数えた。そのうえで「偏り」を次の2つの量で定式化した。</p>
+<ul>
+  <li><b>相互情報量 I(X;Y)</b>：X を「その特徴が出現するか（0/1）」、Y を「正解ラベル」とし、講義の式（log の底は2）で計算した。特徴とカテゴリの関連の<b>強さ</b>を表すが、どちらのカテゴリに偏っているか（向き）は表さない。計算の確認として「城」の値を求めたところ 0.191 となり、講義スライドの計算例と一致した。</li>
+  <li><b>対数オッズ比</b>：log₂{ (a+0.5)/(b+0.5) ÷ (c+0.5)/(d+0.5) }。a, b は政治家のうちその語が出現する/しない人数、c, d は非政治家の同じ人数で、0 で割らないよう各セルに 0.5 を足した。正なら政治家寄り、負なら非政治家寄りで、偏りの<b>向き</b>を表す。</li>
+</ul>
+<p>分類の基準は、相互情報量が 0.05 bit 以上を「偏っている」とし、その向きを対数オッズ比の符号で決めた。0.05 未満は「③ 偏らない」とした。0.05 は、明確に偏る特徴（0.12 以上）と偏らない特徴（0.03 以下）の間に大きな差があったため、その間に設定した。</p>
+
+<h3>2) 調査結果</h3>
+<div class="tblock">
+<table>
+  <tr><th rowspan="2">特徴</th><th colspan="2">出現する人数</th><th colspan="2">出現回数の合計</th><th rowspan="2">相互情報量<br>[bit]</th><th rowspan="2">対数<br>オッズ比</th><th rowspan="2">分類</th></tr>
+  <tr><th>政治家</th><th>非政治家</th><th>政治家</th><th>非政治家</th></tr>
+  <tr><td>「作品」</td><td class="n">0</td><td class="n">7</td><td class="n">0</td><td class="n">46</td><td class="n hl">0.493</td><td class="n">−5.49</td><td>② 非政治家</td></tr>
+  <tr><td>「大臣」</td><td class="n">6</td><td class="n">1</td><td class="n">27</td><td class="n">2</td><td class="n">0.214</td><td class="n">+3.19</td><td>① 政治家</td></tr>
+  <tr><td>「城」</td><td class="n">7</td><td class="n">2</td><td class="n">68</td><td class="n">5</td><td class="n">0.191</td><td class="n">+2.87</td><td>① 政治家</td></tr>
+  <tr><td>「戦争」</td><td class="n">5</td><td class="n">1</td><td class="n">16</td><td class="n">7</td><td class="n">0.147</td><td class="n">+2.66</td><td>① 政治家</td></tr>
+  <tr><td>「大名」</td><td class="n">7</td><td class="n">3</td><td class="n">39</td><td class="n">5</td><td class="n">0.119</td><td class="n">+2.20</td><td>① 政治家</td></tr>
+  <tr><td>「茶」</td><td class="n">5</td><td class="n">3</td><td class="n">15</td><td class="n">26</td><td class="n">0.030</td><td class="n">+1.10</td><td>③ 偏らない</td></tr>
+  <tr><td>「明治」</td><td class="n">7</td><td class="n">7</td><td class="n">30</td><td class="n">33</td><td class="n">0.000</td><td class="n">0.00</td><td>③ 偏らない</td></tr>
+</table>
+<div class="cap">表4　各特徴のカテゴリ別出現状況と偏りの指標（相互情報量の大きい順）</div>
+</div>
+
+<figure><img src="fig2_features.png" alt="特徴ごとの相互情報量と対数オッズ比"></figure>
+<div class="cap">図2　各特徴の相互情報量（左：偏りの強さ）と対数オッズ比（右：偏りの向き）</div>
+
+<p class="noindent">結果をまとめると次のとおりである。</p>
+<ul>
+  <li><b>① 政治家カテゴリに偏って現れる特徴</b>：「大臣」「城」「戦争」「大名」</li>
+  <li><b>② 非政治家カテゴリに偏って現れる特徴</b>：「作品」</li>
+  <li><b>③ 両方のカテゴリに偏らず現れる特徴</b>：「明治」「茶」</li>
+</ul>
+
+<h3>3) 考察</h3>
+<p><b>「作品」は最も強い手がかりである。</b>「作品」は政治家には1人も現れず、非政治家10人中7人に現れたため、相互情報量が 0.493 bit と他の特徴の2倍以上になった。芸術家・文学者のページでは作品の紹介が中心になるので、自然な結果である。一方で、非政治家側に偏る特徴はこの1つしかなく、政治家側の4つと比べて大きく不足している。課題2で、「作品」を持たない非政治家（狩野永徳・岡倉天心）が政治家と誤分類されたこと、BernoulliNB の誤りがすべて非政治家→政治家の向きだったことは、この特徴の偏りで説明できる。</p>
+<p><b>政治家側の4特徴は「時代」で2つに分かれる。</b>「城」「大名」は戦国〜江戸時代の大名、「大臣」「戦争」は明治以降の政治家に対応する語である。どちらも政治家側に偏ってはいるが、1つの特徴だけで全政治家をカバーするものはない。例えば「大臣」は出現する政治家が6人で、戦国武将の多くには現れない。課題2で見た「政治家クラスが2つのまとまりからなる」という構造が、特徴の側からも確認できた。</p>
+<p><b>「明治」は職業ではなく時代を表すので偏らない。</b>「明治」は政治家・非政治家ともに7人に現れ、相互情報量は 0 だった。明治時代に活躍した人物なら職業に関係なく現れ、また江戸時代の人物でも明治時代の評価として言及されることがあるため、分類の役に立たない。</p>
+<p><b>「茶」は出現人数と出現回数で偏りの向きが逆になる。</b>出現する人数では政治家5人・非政治家3人と政治家寄りだが、出現回数の合計では政治家15回・非政治家26回と非政治家寄りである。これは千利休（18回）と岡倉天心（5回）という茶に深く関わる2人が回数を押し上げているためで、一方で戦国大名も茶の湯をたしなんだため、少ない回数ながら多くの政治家に現れる。どちらの見方でも偏りは弱く、③に分類するのが妥当と考えた。この例は、「偏り」を出現の有無で測るか回数で測るかによって結論が変わり得ることを示している。課題1で回数を使うモデルの精度が低かったのも、「茶」のように回数が一部の人物に集中する特徴が誤った手がかりになるためだと考えられる。</p>
+<p><b>相互情報量の限界。</b>相互情報量は向きを持たないので、今回は対数オッズ比と組み合わせて向きを判定した。また、20人という少ないデータでは、1人の出現の有無で値が大きく変わる（例えば「戦争」は非政治家側の1人＝与謝野晶子の影響が大きい）。より信頼できる分析には、人物数を増やすことが必要である。</p>
+
+</body>
+</html>

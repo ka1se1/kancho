@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+
+  postgresql:
+    image: postgres:latest
+    container_name: postgresql
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    hostname: postgres
+    restart: always
+
+  tomcat:
+    image: advpro:tomcat
+    container_name: tomcat_test
+    restart: always
+    ports:
+      - 8080:8080
+      - 22:22
+    volumes:
+      - C:/pleiades/2026-03/workspace/WebApplicationTest/webapp:/usr/local/java/apache-tomcat-9.0.73/webapps/WebApplicationTest:delegated
